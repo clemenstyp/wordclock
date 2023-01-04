@@ -45,9 +45,9 @@ void Config::save() {
 }
 
 void Config::load() {
-  Config::color_bg.r = 200;
-  Config::color_bg.g = 20;
-  Config::color_bg.b = 20;
+  Config::color_bg.r = 0;
+  Config::color_bg.g = 0;
+  Config::color_bg.b = 0;
 
   Config::color_fg.r = 255;
   Config::color_fg.g = 255;

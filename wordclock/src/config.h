@@ -70,12 +70,12 @@
 #endif
 
 #ifndef EXTRA_LEDS
-  #define EXTRA_LEDS 4
+  #define EXTRA_LEDS 5
 #endif
 
 /* Data PIN, where the LED strip is connected to */
 #ifndef DATA_PIN
-  #define DATA_PIN D4
+  #define DATA_PIN D3
 #endif
 
 #ifndef CONSUMPTION_D1_MINI
