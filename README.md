@@ -1,5 +1,5 @@
 # WordClock
-**Based on [WordClock by panbach](https://github.com/panbachi/wordclock)**
+**Based on [WordClock by panbachi](https://github.com/panbachi/wordclock)**
 
 **Font and german layout based on https://www.mikrocontroller.net/articles/Word_Clock**
 
