@@ -47,6 +47,8 @@ String Gui::createStyleSheet() {
   content += "section div div.time { display: flex; }";
   content += "section div div.time span { flex-basis: 20px; text-align: center; font-weight: bold; font-size: 1.3em; }";
   content += "section div div.time select { display: inline-block; flex: 1; }";
+  content += "#reset_wifi { background-color: #3d72a8; border: 0; width: 100%; color: #eee; padding: 10px; cursor: pointer; }";
+  content += "#reset_wifi_message { display: none; text-align: center;}";
   content += "footer { position: fixed; bottom: 0; left: 0; right: 0; background-color: #3d72a8; text-align: right; }";
   content += "footer button { background-color: #3d72a8; color: #eee; border: 0; padding: 15px; text-transform: uppercase; font-weight: bold; }";
   content += "footer button:hover,footer button:active { color: #ccc; cursor: pointer; }";
@@ -75,9 +77,9 @@ String Gui::createNav() {
   content += "</svg>";
   content += "</li>";
   content += "<li name=\"wifi\">";
-  content += "<a href=\"/wifi\"><svg style=\"width:24px;height:24px\" viewBox=\"0 0 24 24\">";
+  content += "<svg style=\"width:24px;height:24px\" viewBox=\"0 0 24 24\">";
   content += "<path fill=\"#eee\" d=\"M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21M12,3C7.95,3 4.21,4.34 1.2,6.6L3,9C5.5,7.12 8.62,6 12,6C15.38,6 18.5,7.12 21,9L22.8,6.6C19.79,4.34 16.05,3 12,3M12,9C9.3,9 6.81,9.89 4.8,11.4L6.6,13.8C8.1,12.67 9.97,12 12,12C14.03,12 15.9,12.67 17.4,13.8L19.2,11.4C17.19,9.89 14.7,9 12,9Z\" />";
-  content += "</svg></a>";
+  content += "</svg>";
   content += "</li>";
   content += "</nav>";
 
@@ -182,6 +184,10 @@ String Gui::createContent() {
   content += "</select></div></div>";
   content += "</section>";
 
+  content += "<section id=\"wifi\">";
+  content += "<button id=\"reset_wifi\" type=\"submit\">WiFi Einstellungen zurücksetzen</button>";
+  content += "<div id=\"reset_wifi_message\">Die WiFi Einstellungen wurden zurückgesetzt. Es besteht keine Verbindung mehr zu der WordClock. Um die WordClock weiterhin zu verwenden muss das WiFi erneut eingerichtet werden.</div>";
+  content += "</section>";
   content += "</main>";
 
   return content;
