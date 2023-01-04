@@ -2,7 +2,7 @@
 #define WORDCLOCK_GRID_LANG_DE_DE_ROUND_H
 
 #ifndef EXTRA_LEDS
-  #define EXTRA_LEDS 4
+  #define EXTRA_LEDS 5
 #endif
 
 class Grid_de_DE_round {

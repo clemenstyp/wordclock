@@ -23,12 +23,12 @@ void Grid_de_DE_round::setTime(int correctHour, int correctMinute) {
 
   int correctMinuteOfDay = (correctHour * 60) + correctMinute;
 
-  int minDiff =  correctMinuteOfDay % 5;
+  int minDiff = correctMinuteOfDay % 5;
   int minuteDifference = 0;
-  if (minDiff <= 2){
-    minuteDifference =  minDiff;
-  }else{
-    minuteDifference =  minDiff - 5; 
+  if (minDiff <= 2) {
+    minuteDifference = minDiff;
+  } else {
+    minuteDifference = minDiff - 5;
   }
   int roundedMinuteOfDay = correctMinuteOfDay - minuteDifference;
 
@@ -41,6 +41,7 @@ void Grid_de_DE_round::setTime(int correctHour, int correctMinute) {
   // (x|x|0|x|x) if the difference is +1 minute - the following led lights
   // (x|x|0|0|x)
 
+  // für halb und viertel vor:
   if (minute >= 25) {
     hour += 1;
   }
@@ -48,22 +49,28 @@ void Grid_de_DE_round::setTime(int correctHour, int correctMinute) {
   minute = minute / 5;
   hour = hour % 12;
 
+  // background color
   for (int i = 0; i < NUM_LEDS; i++) {
-    Led::ids[i].setRGB(Config::color_bg.r * 0.2, Config::color_bg.g * 0.2,
+    Led::ids[i].setRGB(Config::color_bg.r * 0.2,
+                       Config::color_bg.g * 0.2,
                        Config::color_bg.b * 0.2);
   }
 
+  // show es ist:
   for (int i = 0; i < 5; i++) {
     Led::ids[Led::getLedId(Grid_de_DE_round::time_it_is[i])].setRGB(
         Config::color_fg.r, Config::color_fg.g, Config::color_fg.b);
   }
 
+  // show minutes
   for (int m = 0; m < 12; m++) {
     if (Grid_de_DE_round::time_minutes[minute][m] >= 0) {
       Led::ids[Led::getLedId(Grid_de_DE_round::time_minutes[minute][m])].setRGB(
           Config::color_fg.r, Config::color_fg.g, Config::color_fg.b);
     }
   }
+
+  // show stunden
 
   if (hour == 1 && minute == 0) {
     hourLimit = 3; // show "ein" instead of "eins"
@@ -76,6 +83,7 @@ void Grid_de_DE_round::setTime(int correctHour, int correctMinute) {
     }
   }
 
+  // single minutes 0: before, led 0,1,2,3
   int singleMinutesFirstLED = 0;
   if (GRID_SINGLE_MINUTES == 1) {
     singleMinutesFirstLED = NUM_LEDS - EXTRA_LEDS;
@@ -87,28 +95,35 @@ void Grid_de_DE_round::setTime(int correctHour, int correctMinute) {
   // (x|x|x|0|x)
   switch (minuteDifference) {
   case -2:
-    Led::ids[singleMinutesFirstLED].setRGB(
-        Config::color_fg.r, Config::color_fg.g, Config::color_fg.b);
-    Led::ids[singleMinutesFirstLED + 1].setRGB(
-        Config::color_fg.r, Config::color_fg.g, Config::color_fg.b);
+    Led::ids[singleMinutesFirstLED].setRGB(Config::color_fg.r,
+                                           Config::color_fg.g,
+                                           Config::color_fg.b);
+    Led::ids[singleMinutesFirstLED + 1].setRGB(Config::color_fg.r,
+                                               Config::color_fg.g,
+                                               Config::color_fg.b);
     break;
   case -1:
-    Led::ids[singleMinutesFirstLED + 1].setRGB(
-        Config::color_fg.r, Config::color_fg.g, Config::color_fg.b);
+    Led::ids[singleMinutesFirstLED + 1].setRGB(Config::color_fg.r,
+                                               Config::color_fg.g,
+                                               Config::color_fg.b);
     break;
   case 0:
-    Led::ids[singleMinutesFirstLED + 2].setRGB(
-        Config::color_fg.r, Config::color_fg.g, Config::color_fg.b);
+    Led::ids[singleMinutesFirstLED + 2].setRGB(Config::color_fg.r,
+                                               Config::color_fg.g,
+                                               Config::color_fg.b);
     break;
   case 1:
-    Led::ids[singleMinutesFirstLED + 3].setRGB(
-        Config::color_fg.r, Config::color_fg.g, Config::color_fg.b);
+    Led::ids[singleMinutesFirstLED + 3].setRGB(Config::color_fg.r,
+                                               Config::color_fg.g,
+                                               Config::color_fg.b);
     break;
   case +2:
-    Led::ids[singleMinutesFirstLED + 3].setRGB(
-        Config::color_fg.r, Config::color_fg.g, Config::color_fg.b);
-    Led::ids[singleMinutesFirstLED + 4].setRGB(
-        Config::color_fg.r, Config::color_fg.g, Config::color_fg.b);
+    Led::ids[singleMinutesFirstLED + 3].setRGB(Config::color_fg.r,
+                                               Config::color_fg.g,
+                                               Config::color_fg.b);
+    Led::ids[singleMinutesFirstLED + 4].setRGB(Config::color_fg.r,
+                                               Config::color_fg.g,
+                                               Config::color_fg.b);
     break;
   default:
     break;
