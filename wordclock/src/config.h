@@ -106,5 +106,6 @@ class Config {
 
     static void save();
     static void load();
+    static void setup();
 };
 #endif

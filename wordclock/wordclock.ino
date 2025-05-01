@@ -6,7 +6,6 @@
 #include <FastLED.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-#include <FS.h>
 
 #include "src/grid.h"
 #include "src/wifi.h"
@@ -24,7 +23,7 @@
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  SPIFFS.begin();
+
 
   if (DATA_PIN != D4) {
     // If we use a data pin different than d4, we will deactivate d4 because it
@@ -34,9 +33,9 @@ void setup() {
     pinMode(D4, OUTPUT);    // Define LED pin as output
     digitalWrite(D4, HIGH); // Switch the blue board status LED OFF
   }
-
+  Config::setup();
   Config::load();
-
+  
   Led::setup();
   Time::setup();
 
@@ -48,6 +47,7 @@ void setup() {
     // run simple LED check at start (uncomment to deactivate)
     Healthcheck::run();
   }
+
 }
 
 void loop() {

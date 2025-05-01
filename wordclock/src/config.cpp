@@ -1,4 +1,5 @@
 #include <FS.h>
+#include "LittleFS.h"
 #include <ArduinoJson.h>
 
 #include "config.h"
@@ -7,20 +8,36 @@
 #include "led.h"
 #include "utcOffset.h"
 
+void Config::setup(){
+
+    // Dateisystem formatieren
+  //LittleFS.format();
+
+  // Dateisystem initialisieren
+  if( LittleFS.begin() ){
+    Serial.println("Dateisystem: initialisiert");
+  }else{
+    Serial.println("Dateisystem: Fehler beim initialisieren");
+  }
+}
+
 void Config::save() {
-  File file = SPIFFS.open("/wordclock_config.json", "w");
+  //File file = SPIFFS.open("/wordclock_config.json", "w");
+  File file = LittleFS.open("/wordclock_config.json", "w");
 
   if(!file) {
     Serial.println("Can't open wordclock_config.json for writing");
     return;
   }
 
-  Serial.println("Save config.");
 
   Time::ntpClient.setPoolServerName(Config::ntp.c_str());
   Time::ntpClient.setTimeOffset(Config::timezone);
 
-  StaticJsonDocument<1024> doc;
+  //StaticJsonDocument<1024> doc;
+
+  JsonDocument doc;
+
   doc["color_bg_r"] = Config::color_bg.r;
   doc["color_bg_g"] = Config::color_bg.g;
   doc["color_bg_b"] = Config::color_bg.b;
@@ -42,6 +59,10 @@ void Config::save() {
   serializeJson(doc, file);
 
   file.close();
+  Serial.println("Config saved.");
+  // Serial.println("Config:");
+  // serializeJson(doc, Serial);
+
 }
 
 void Config::load() {
@@ -68,7 +89,8 @@ void Config::load() {
 
   Config::healthcheck = false;
 
-  File file = SPIFFS.open("/wordclock_config.json", "r");
+  //File file = SPIFFS.open("/wordclock_config.json", "r");
+  File file = LittleFS.open("/wordclock_config.json", "r");
 
   if(!file) {
     Serial.println("Failed to open config file.");
@@ -76,10 +98,13 @@ void Config::load() {
     return;
   }
 
-  Serial.println("Load config.");
 
-  StaticJsonDocument<1024> doc;
+  // StaticJsonDocument<1024> doc;
+  JsonDocument doc;
   deserializeJson(doc, file);
+
+  Serial.println("Config 1:");
+  serializeJson(doc, Serial);
 
   Config::color_bg.r = doc["color_bg_r"].as<int>();
   Config::color_bg.g = doc["color_bg_g"].as<int>();
@@ -127,6 +152,12 @@ void Config::load() {
   Time::ntpClient.setTimeOffset(Config::timezone);
 
   file.close();
+
+
+  Serial.println("Config loaded.");
+
+  // Serial.println("Config:");
+  // serializeJson(doc, Serial);
 }
 
 color_t Config::color_bg{};
