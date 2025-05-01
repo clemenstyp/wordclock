@@ -1,0 +1,639 @@
+substitutions:
+  devicename: wordclock
+  friendly_name: "WordClock"
+  led_pin: D3
+  i2c_scl_pin: D1
+  i2c_sda_pin: D2
+  fallback_hotspot_ssid: "WordClock"
+  fallback_hotspot_password: "47110815"
+
+
+esphome:
+  name: "${devicename}" 
+  friendly_name: "${friendly_name}"
+  comment: "$friendly_name - $devicename"
+  name_add_mac_suffix: false
+  min_version: "2023.5.1"
+  on_boot:
+    then:
+      # read the RTC time once when the system boots
+      - ds1307.read_time:
+      - light.turn_on: 
+          id: word_clock
+
+esp8266:
+  board: d1_mini
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  reboot_timeout: 0min
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${fallback_hotspot_ssid}"
+    password: "${fallback_hotspot_password}"
+
+# Enable logging
+logger:
+  level: INFO
+  #level: DEBUG
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_encryption
+  reboot_timeout: 0s
+
+ota:
+  platform: esphome
+  password: !secret ota_pass
+
+captive_portal:
+
+# Enable Web Server
+web_server:
+  port: 80
+  local: true
+  version: 3
+
+# used for ds1307 i2c
+# sda kann auch GPIO4 sein
+# scl kann auch GPIO5 sein 
+i2c:
+  sda: ${i2c_sda_pin}
+  scl: ${i2c_scl_pin}
+  scan: true
+
+time:
+  - platform: ds1307
+    # repeated synchronization is not necessary unless the external RTC
+    # is much more accurate than the internal clock
+    update_interval: never
+    id: ds1307_time
+  - platform: sntp
+    # instead try to synchronize via network repeatedly ...
+    id: sntp_time
+    timezone: 'Europe/Berlin'
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+    on_time_sync:
+      then:
+        # ... and update the RTC when the synchronization was successful
+        ds1307.write_time:
+
+#binary_sensor:
+#  - platform: gpio
+#    id: reset_button
+#    pin:
+#      number: GPIO0
+#      mode: INPUT_PULLUP
+#      inverted: True
+#    internal: true
+#    on_click:
+#      - min_length: 2s
+#        max_length: 5s
+#        then:
+#          - button.press: restart_button
+#      - min_length: 10s
+#        max_length: 20s
+#        then:
+#          - button.press: factory_reset_button
+
+button:
+  - platform: factory_reset
+    id: factory_reset_button
+    name: Factory Reset Word Clock
+  - platform: restart
+    id: restart_button
+    name: Restart Word Clock
+#  - id: test_button
+#    platform: template
+#    name: Run Test
+#    on_press:
+#      - script.execute:
+#          id: run_test
+        # Calling a script with parameters
+        #- script.execute:
+        #    id: run_test
+        #    delay_ms: 500
+
+select:
+  - platform: template
+    name: "03. Brightness"
+    id: automatic_brightness
+    restore_value: True
+    optimistic: True
+    icon: "mdi:brightness-auto"
+    options:
+      - Automatic
+      - Manual
+  - platform: template
+    name: "08 Indication: It is"
+    id: indication_it_is
+    restore_value: True
+    optimistic: True
+    icon: "mdi:file-word-box-outline"
+    options:
+      - "On"
+      - "Off"
+  - platform: template
+    name: "09 Indication: Minutes"
+    id: indication_minutes
+    restore_value: True
+    optimistic: True
+    icon: "mdi:file-word-box-outline"
+    options:
+      - "On"
+      - "Off"
+  - platform: template
+    name: "10 Indication: Week Days"
+    id: indication_week_days
+    restore_value: True
+    optimistic: True
+    icon: "mdi:file-word-box-outline"
+    options:
+      - "On"
+      - "Off"
+
+datetime:
+  - platform: template
+    id: morning_transition_start_time
+    type: time
+    name: Morning Transition Start Time
+    optimistic: yes
+    initial_value: "06:00:00"
+    restore_value: true
+  - platform: template
+    id: morning_transition_end_time
+    type: time
+    name: Morning Transition End Time
+    optimistic: yes
+    initial_value: "09:00:00"
+    restore_value: true
+  - platform: template
+    id: night_transition_start_time
+    type: time
+    name: Night Transition Start Time
+    optimistic: yes
+    initial_value: "18:00:00"
+    restore_value: true
+  - platform: template
+    id: night_transition_end_time
+    type: time
+    name: Night Transition End Time
+    optimistic: yes
+    initial_value: "22:00:00"
+    restore_value: true
+
+script:
+  - id: set_light_brightness
+    parameters:
+      quick_transition: bool
+    then:
+      - if: 
+          condition:
+            and: 
+              - lambda: return id(automatic_brightness).index_of("Automatic") == id(automatic_brightness).active_index();
+              - light.is_on: word_clock
+          then:
+            - light.control:
+                id: word_clock
+                transition_length: !lambda |-
+                  if (quick_transition) 
+                    return 500;
+                  return 10000;
+                brightness: !lambda |-
+                  float min_brightness = id(minimum_brightness).state;
+                  float max_brightness = id(maximum_brightness).state;
+                  float brightness = id(maximum_brightness).state;
+
+                  auto current_time = id(sntp_time).now();
+                  if (!current_time.is_valid()) {
+                    return brightness;
+                  }
+                  int timestamp_with_offset = current_time.timestamp + (int(id(hour_offset).state) * 3600) + (int(id(minutes_offset).state) * 60);
+                  auto time = ESPTime::from_epoch_local(timestamp_with_offset);
+
+                  int time_minute_of_day = (time.hour * 60) + time.minute % 1440;
+            
+                  int morning_transition_start_minute_of_day = (id(morning_transition_start_time).hour * 60) + id(morning_transition_start_time).minute;
+                  int morning_transition_end_minute_of_day = ( id(morning_transition_end_time).hour * 60) +  id(morning_transition_end_time).minute;
+                  int night_transition_start_minute_of_day = (id(night_transition_start_time).hour * 60) + id(night_transition_start_time).minute;
+                  int night_transition_end_minute_of_day = (id(night_transition_end_time).hour * 60) + id(night_transition_end_time).minute;
+
+
+                  if (time_minute_of_day >= night_transition_end_minute_of_day || time_minute_of_day < morning_transition_start_minute_of_day) {
+                    brightness = min_brightness;  // Low brightness at night
+                  } else if (time_minute_of_day >= night_transition_start_minute_of_day ) {
+                    // Calculate evening brightness based on time difference
+                    float total_duration = float(night_transition_end_minute_of_day - night_transition_start_minute_of_day);
+                    float time_passed = float(time_minute_of_day - night_transition_start_minute_of_day);    
+
+                    brightness = max_brightness - ((max_brightness - min_brightness) * (time_passed / total_duration));  // Gradually decrease brightness
+                  } else if (time_minute_of_day < morning_transition_end_minute_of_day) {
+                    // Calculate evening brightness based on time difference
+                    float total_duration = float(morning_transition_end_minute_of_day - morning_transition_start_minute_of_day);
+                    float time_passed = float(time_minute_of_day - morning_transition_start_minute_of_day);
+                                        
+                    brightness = min_brightness + ((max_brightness - min_brightness) * (time_passed / total_duration));  // Gradually increse brightness
+                  } 
+                  return brightness;
+
+
+number:
+  - platform: template
+    name: "11. Red"
+    id: red
+    optimistic: True
+    min_value: 0
+    max_value: 1
+    step: 0.01
+    restore_value: True
+    disabled_by_default: True
+    icon: "mdi:palette"
+    on_value:
+      then:
+        - if:
+            condition:
+              - lambda: "return id(word_clock).remote_values.get_red() != x;"
+            then:
+              - light.control:
+                  id: word_clock
+                  red: !lambda "return x;"
+                  green: !lambda "return id(green).state;"
+                  blue: !lambda "return id(blue).state;"
+  - platform: template
+    name: "12. Green"
+    id: green
+    optimistic: True
+    min_value: 0
+    max_value: 1
+    step: 0.01
+    restore_value: True
+    disabled_by_default: True
+    icon: "mdi:palette"
+    on_value:
+      then:
+        - if:
+            condition:
+              - lambda: "return id(word_clock).remote_values.get_green() != x;"
+            then:
+              - light.control:
+                  id: word_clock
+                  red: !lambda "return id(red).state;"
+                  green: !lambda "return x;"
+                  blue: !lambda "return id(blue).state;"
+  - platform: template
+    name: "13. Blue"
+    id: blue
+    optimistic: True
+    min_value: 0
+    max_value: 1
+    step: 0.01
+    restore_value: True
+    disabled_by_default: True
+    icon: "mdi:palette"
+    on_value:
+      then:
+        - if:
+            condition:
+              - lambda: "return id(word_clock).remote_values.get_blue() != x;"
+            then:
+              - light.control:
+                  id: word_clock
+                  red: !lambda "return id(red).state;"
+                  green: !lambda "return id(green).state;"
+                  blue: !lambda "return x;"
+  - platform: template
+    name: "02. Transition"
+    id: transition
+    optimistic: True
+    min_value: 0
+    max_value: 10
+    step: 1
+    restore_value: True
+    icon: "mdi:transition"
+  - platform: template
+    name: "06. Hour Offset"
+    id: hour_offset
+    optimistic: True
+    min_value: 0
+    max_value: 23
+    step: 1
+    restore_value: True
+    icon: "mdi:clock-plus-outline"
+  - platform: template
+    name: "07. Minutes Offset"
+    id: minutes_offset
+    optimistic: True
+    min_value: 0
+    max_value: 59
+    step: 1
+    restore_value: True
+    icon: "mdi:clock-plus-outline"
+  - platform: template
+    name: "04. Minimum Brightness"
+    id: minimum_brightness
+    optimistic: True
+    min_value: 0.01
+    max_value: 1
+    step: 0.01
+    restore_value: True
+    icon: "mdi:brightness-4"
+    on_value:
+      - if: 
+          condition:
+            - lambda: "return id(maximum_brightness).state < x;"
+          then:
+            - number.set:
+               id: maximum_brightness
+               value: !lambda "return x;"
+      - script.execute: 
+          id: set_light_brightness
+          quick_transition: True
+  - platform: template
+    name: "05. Maximum Brightness"
+    id: maximum_brightness
+    optimistic: True
+    min_value: 0.01
+    max_value: 1
+    initial_value: 1
+    step: 0.01
+    restore_value: True  
+    icon: "mdi:brightness-5"
+    on_value:
+      - if: 
+          condition:
+            - lambda: "return x < id(minimum_brightness).state;"
+          then:
+            - number.set:
+               id: minimum_brightness
+               value: !lambda "return x;"
+      - script.execute: 
+          id: set_light_brightness
+          quick_transition: True
+  - platform: template
+    name: "Brightness"
+    id: brightness
+    optimistic: True
+    min_value: 0.01
+    max_value: 1
+    initial_value: 1
+    step: 0.01
+    restore_value: True
+    internal: True
+
+
+light:
+  - platform: neopixelbus
+    name: "01. Word Clock"
+    id: word_clock
+    type: GRB
+    variant: WS2812X
+    pin: $led_pin
+    num_leds: 126 
+    default_transition_length: 10s
+    icon: "mdi:file-word-box-outline"
+    on_state:
+      then:
+        - if:
+            condition:
+              and:
+                - lambda: "return id(word_clock).get_effect_name() == \"None\";"
+                - light.is_on: word_clock
+            then:
+              - delay: 10ms
+              # Enforce the light effect to be at "Clock"
+              - light.control:
+                  id: word_clock
+                  effect: Clock
+        - if:
+            condition:
+              and:
+                - lambda: "return id(word_clock).remote_values.get_red() != id(red).state;"
+                - light.is_on: word_clock
+            then:
+              - number.set:
+                  id: red
+                  value: !lambda "return id(word_clock).remote_values.get_red();"
+        - if:
+            condition:
+              and:
+                - lambda: "return id(word_clock).remote_values.get_green() != id(green).state;"
+                - light.is_on: word_clock
+            then:
+              - number.set:
+                  id: green
+                  value: !lambda "return id(word_clock).remote_values.get_green();"
+        - if:
+            condition:
+              and:
+                - lambda: "return id(word_clock).remote_values.get_blue() != id(blue).state;"
+                - light.is_on: word_clock
+            then:
+              - number.set:
+                  id: blue
+                  value: !lambda "return id(word_clock).remote_values.get_blue();"
+        - if: 
+            condition:
+              and: 
+                - lambda: return id(automatic_brightness).index_of("Manual") == id(automatic_brightness).active_index();
+                - lambda: "return id(word_clock).remote_values.get_brightness() != id(brightness).state;"
+                - light.is_on: word_clock
+            then:
+              - number.set:
+                  id: brightness
+                  value: !lambda "return id(word_clock).remote_values.get_brightness();"
+
+    on_turn_on:
+      then:
+        - if:
+            condition:
+              - lambda: return id(automatic_brightness).index_of("Manual") == id(automatic_brightness).active_index();
+            then:
+              - light.control: 
+                  id: word_clock
+                  effect: Clock
+                  red: !lambda "return id(red).state;"
+                  green: !lambda "return id(green).state;"
+                  blue: !lambda "return id(blue).state;"
+                  brightness: !lambda "return id(brightness).state;"
+            else:
+              - light.control: 
+                  id: word_clock
+                  effect: Clock
+                  red: !lambda "return id(red).state;"
+                  green: !lambda "return id(green).state;"
+                  blue: !lambda "return id(blue).state;"
+    effects:
+      - addressable_lambda:
+          name: "Clock"
+          update_interval: 20ms
+          lambda: |-
+            static int minutes;
+            static int hours;
+            static int CurrentTime[5];
+            static int PreviousTime[5];
+            static int fade;
+            static int fadeTransition;
+
+            // LED IDs            
+            //   110 | E S K I S T L F Ü N F | 120
+            //   109 | Z E H N Z W A N Z I G |  99
+            //   88  | D R E I V I E R T E L |  98
+            //   87  | T G N A C H V O R J M |  77
+            //   66  | H A L B X Z W Ö L F P |  76
+            //   65  | Z W E I N S I E B E N |  55
+            //   44  | K D R E I R H F Ü N F |  54
+            //   43  | E L F N E U N V I E R |  33
+            //   22  | W A C H T Z E H N R S |  32
+            //   21  | B S E C H S F M U H R |  11
+            //   0   | E V M D M D F S S P I |  10
+            //   121 |       . . . . .       | 125 
+
+            static Color letters[126];
+            const int words[37][12] {
+              {110,111,113,114,115, -1, -1, -1, -1, -1, -1, -1}, // [0]  ES IST
+              { 11, 12, 13, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [1]  UHR
+              {117,118,119,120, 82, 83, 84, 85, -1, -1, -1, -1}, // [2]  FÜNF NACH
+              {109,108,107,106, 82, 83, 84, 85, -1, -1, -1, -1}, // [3]  ZEHN NACH
+              { 92, 93, 94, 95, 96, 97, 98, 82, 83, 84, 85, -1}, // [4]  VIERTEL NACH
+              {105,104,103,102,101,100, 99, 82, 83, 84, 85, -1}, // [5]  ZWANZIG NACH
+              {117,118,119,120, 79, 80, 81, 66, 67, 68, 69, -1}, // [6]  FÜNF VOR HALB
+              { 66, 67, 68, 69, -1, -1, -1, -1, -1, -1, -1, -1}, // [7]  HALB
+              {117,118,119,120, 82, 83, 84, 85, 66, 67, 68, 69}, // [8]  FÜNF NACH HALB
+              {105,104,103,102,101,100, 99, 79, 80, 81, -1, -1}, // [9]  ZWANZIG VOR
+              { 92, 93, 94, 95, 96, 97, 98, 79, 80, 81, -1, -1}, // [10] VIERTEL VOR
+              {109,108,107,106, 79, 80, 81, -1, -1, -1, -1, -1}, // [11] ZEHN VOR
+              {117,118,119,120, 79, 80, 81, -1, -1, -1, -1, -1}, // [12] FÜNF VOR
+              { 71, 72, 73, 74, 75, -1, -1, -1, -1, -1, -1, -1}, // [13] ZWÖLF
+              { 63, 62, 61, 60, -1, -1, -1, -1, -1, -1, -1, -1}, // [14] EINS
+              { 65, 64, 63, 62, -1, -1, -1, -1, -1, -1, -1, -1}, // [15] ZWEI
+              { 45, 46, 47, 48, -1, -1, -1, -1, -1, -1, -1, -1}, // [16] DREI
+              { 36, 35, 34, 33, -1, -1, -1, -1, -1, -1, -1, -1}, // [17] VIER
+              { 51, 52, 53, 54, -1, -1, -1, -1, -1, -1, -1, -1}, // [18] FÜNF
+              { 20, 19, 18, 17, 16, -1, -1, -1, -1, -1, -1, -1}, // [19] SECHS
+              { 60, 59, 58, 57, 56, 55, -1, -1, -1, -1, -1, -1}, // [20] SIEBEN
+              { 23, 24, 25, 26, -1, -1, -1, -1, -1, -1, -1, -1}, // [21] ACHT
+              { 40, 39, 38, 37, -1, -1, -1, -1, -1, -1, -1, -1}, // [22] NEUN
+              { 27, 28, 29, 30, -1, -1, -1, -1, -1, -1, -1, -1}, // [23] ZEHN
+              { 43, 42, 41, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [24] ELF
+              {  2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [25] - S (Sonntag)
+              {  3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [26] - M (Montag)
+              {  4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [27] - D (Dienstag)
+              {  5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [28] - M (Mittwoch)
+              {  6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [29] - D (Donnnerstag)
+              {  7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [30] - F (Freitag)
+              {  8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [31] - S (Samstag)
+              {123, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [32] - MIN 
+              {124, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [33] - MIN + 1
+              {125, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [34] - MIN + 2
+              {121,122, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, // [35] - MIN - 2
+              {122, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}  // [36] - MIN - 1
+            };
+
+            if (initial_run) {
+              it.all() = Color::BLACK;
+              std::fill_n(letters, it.size(), Color::BLACK);
+              fade = int(25*id(transition).state);
+              fadeTransition = int(25*id(transition).state);
+            }
+            
+            auto current_time = id(sntp_time).now();
+            if (!current_time.is_valid()) {
+              return;
+            }
+            int timestamp_with_offset = current_time.timestamp + (int(id(hour_offset).state) * 3600) + (int(id(minutes_offset).state) * 60);
+            auto time = ESPTime::from_epoch_local(timestamp_with_offset);
+
+            /*
+             * Below is the transition control of the clock to change to the next time (next 5 minute section).
+             * The update_interval is 20ms, which would mean that it takes 50 iterations in total to fade to the next time over a 1 second period.
+             * This fade is divided into fading-out the old time (25 steps) and fading-in the new time (25 steps).
+             * The transition slider specifies the number of seconds the total fade takes (id: transition).
+             * The value of the transition is multiplied by 25 (steps) to create the fader.
+             */
+            auto trans = int(25*id(transition).state);
+            if (trans != fadeTransition) {
+              fade = trans;
+              fadeTransition = trans;
+            }
+
+            int time_minute_of_day = (time.hour * 60) + time.minute;
+            
+
+            int five_minute_interval = time_minute_of_day % 5;
+            if (five_minute_interval <= 2) {
+              // round to lower 5 minutes
+              time_minute_of_day = time_minute_of_day - five_minute_interval;
+            } else {
+              // round to next 5 minutes
+              time_minute_of_day = time_minute_of_day - five_minute_interval + 5;
+            }
+            
+            time_minute_of_day = time_minute_of_day % 1440;
+
+
+
+            minutes = (int)(time_minute_of_day / 5) * 5 % 60; // minutes per 5
+            hours = (time_minute_of_day / 60) % 24;
+
+            // für halb und viertel vor:
+            if (minutes >= 25){
+              hours += 1;
+            }
+
+            CurrentTime[0] = 0;
+            CurrentTime[1] = minutes / 5 + 1;
+            CurrentTime[2] = (hours % 12) + 13;
+            CurrentTime[3] = time.day_of_week + 24;
+            CurrentTime[4] = (five_minute_interval % 5) + 32;
+
+            if (PreviousTime[1] == CurrentTime[1]) {
+              std::fill_n(letters, it.size(), Color::BLACK);
+              for (int i = 0; i < 5; i++) { 
+                if (i == 0 && id(indication_it_is).index_of("Off") == id(indication_it_is).active_index()) {
+                  continue;
+                }
+                if (i == 3 && id(indication_week_days).index_of("Off") == id(indication_week_days).active_index()) {
+                  continue;
+                }
+                if (i == 4 && id(indication_minutes).index_of("Off") == id(indication_minutes).active_index()) {
+                  continue;
+                }
+                for (int j = 0; j < 12; j++) {
+                  if (words[CurrentTime[i]][j] >= 0) {
+                    letters[words[CurrentTime[i]][j]] = current_color;
+                    }
+                }
+              }
+            }
+
+            if (!initial_run) {
+              // Fade words from selected brightness down to zero, when time changes.
+              if (PreviousTime[1] != CurrentTime[1] && fade > 0) {
+                for (int i = 0; i < it.size(); i++) it[i] = Color(int(letters[i].r*fade/fadeTransition), int(letters[i].g*fade/fadeTransition), int(letters[i].b*fade/fadeTransition));
+                fade--;
+                return;
+              }
+
+              // Set previous time to current time, such that above code will not run again. 
+              for (int i = 0; i < 5; i++) PreviousTime[i] = CurrentTime[i];
+              
+              // Now that new pixels for current time are known, slowly fade in the words.
+              if (fade < fadeTransition) {
+                for (int i = 0; i < it.size(); i++) it[i] = Color(int(letters[i].r*fade/fadeTransition), int(letters[i].g*fade/fadeTransition), int(letters[i].b*fade/fadeTransition));
+                fade++;
+                return;
+              }
+            }
+              
+            for (int i = 0; i < it.size(); i++) {
+              it[i] = letters[i];
+            }
+            // Set previous time to current time, such that above code will not run again. 
+            for (int i = 0; i < 5; i++) {
+              PreviousTime[i] = CurrentTime[i];
+            }
