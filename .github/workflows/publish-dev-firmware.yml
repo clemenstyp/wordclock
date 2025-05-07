@@ -60,9 +60,13 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: |
           git tag -d ${{ env.dev_tag }} || true
-          git push origin :refs/tags/${{ env.dev_tag }} || true
-          git tag ${{ env.dev_tag }}
-          git push origin ${{ env.dev_tag }}
+          git push origin --delete ${{ env.dev_tag }} || true
+      - name: Generate Changelog
+        run: |
+          last_version=$(git describe --tags --abbrev=0)
+          last_commit=$()
+          echo "# Changes since Version: $last_version" > ${{ github.workspace }}-CHANGELOG.txt
+          git log $last_version..HEAD --pretty=format:"%ad: %s" --date=short >> ${{ github.workspace }}-CHANGELOG.txt
       - name: Upload files to release
         uses: softprops/action-gh-release@v2.2.2
         with:
@@ -70,4 +74,4 @@ jobs:
           tag_name: ${{ env.dev_tag }}
           prerelease: true
           name: "Development Version: ${{ needs.build-firmware.outputs.version }}"
-          body: ${{ github.event.head_commit.message }}
+          body_path: ${{ github.workspace }}-CHANGELOG.txt
