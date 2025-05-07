@@ -21,7 +21,7 @@ jobs:
       #### Modify below here to match your project ####
       files: |
         wordclock-esp8266-d1-mini.dev.yaml
-      esphome-version: 2025.4.0
+      esphome-version: stable
       combined-name: wordclock
       #### Modify above here to match your project ####
 
