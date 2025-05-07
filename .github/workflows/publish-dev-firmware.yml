@@ -63,8 +63,6 @@ jobs:
         run: |
           git tag -d ${{ env.dev_tag }} || true
           git push origin --delete ${{ env.dev_tag }} || true
-          git tag -d pre-release || true
-          git push origin -d pre-release || true
       - name: Generate Changelog
         run: |
           last_version=$(git describe --tags --abbrev=0)
