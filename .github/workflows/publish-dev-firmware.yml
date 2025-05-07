@@ -4,9 +4,14 @@ on:
   push:
     branches:
       - main
+    tags-ignore:
+      - dev-build
 
 permissions:
   contents: write
+
+env:
+  dev_tag: dev-build
 
 jobs:
   build-firmware:
@@ -28,11 +33,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v3
       - name: Download Artifact
         uses: actions/download-artifact@v4.3.0
         with:
           path: files
-
       - name: Copy files to output
         run: |-
           shopt -s nullglob
@@ -51,12 +56,18 @@ jobs:
             popd
           done
           popd
-
+      - name: Remove dev-build tag
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          git tag -d ${{ env.dev_tag }} || true
+          git push origin :refs/tags/${{ env.dev_tag }} || true
+          git tag ${{ env.dev_tag }}
+          git push origin ${{ env.dev_tag }}
       - name: Upload files to release
         uses: softprops/action-gh-release@v2.2.2
         with:
           files: output/*
-          tag_name: pre-release
+          tag_name: ${{ env.dev_tag }}
           prerelease: true
           name: "Development Version: ${{ needs.build-firmware.outputs.version }}"
-          append_body: true
+          body: ${{ github.event.head_commit.message }}

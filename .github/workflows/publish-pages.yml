@@ -56,7 +56,7 @@ jobs:
       - name: Fetch dev firmware files
         uses: robinraju/release-downloader@v1.12
         with:
-          tag: pre-release
+          tag: dev-build
           fileName: '*'
           out-file-path: output/firmware-dev
 
