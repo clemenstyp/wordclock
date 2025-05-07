@@ -92,7 +92,6 @@ time:
         then:
           - if:
               condition:
-                # Same syntax for is_off
                 switch.is_on: test_run_status
               then:
                 - lambda: |-
