@@ -1,0 +1,53 @@
+packages:
+  # Include all of the core configuration
+  core: !include
+    file: wordclock-core.yaml
+    vars:
+      devicename: wordclock
+      friendly_name: "WordClock"
+      fallback_hotspot_ssid: "WordClock"
+      fallback_hotspot_password: "47110815"
+
+  wordclock: !include
+    file: wordclock.yaml
+    vars:
+      led_pin: D3
+      i2c_scl_pin: D1
+      i2c_sda_pin: D2
+
+
+
+esp8266:
+  board: d1_mini
+  restore_from_flash: true
+
+http_request:
+  useragent: esphome/device
+  timeout: 10s
+  verify_ssl: false
+
+ota:
+  - platform: http_request
+
+# Enable logging
+logger:
+  level: INFO
+
+update:
+  - platform: http_request
+    id: firmware_update
+    name: Firmware Update
+    source: https://clemenstyp.github.io/wordclock/firmware/wordclock.manifest.json
+    update_interval: 5h
+    icon: "mdi:cellphone-arrow-down"
+    web_server: { sorting_weight: 30, sorting_group_id: "sorting_group_advanced_settings" }
+
+button:
+  - platform: template
+    name: "Install Update"
+    id: install_firmware_update
+    web_server: { sorting_weight: 31, sorting_group_id: "sorting_group_advanced_settings" }
+    icon: "mdi:cellphone-arrow-down"
+    on_press:
+      - update.perform:
+          id: firmware_update

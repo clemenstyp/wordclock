@@ -1,0 +1,62 @@
+name: Publish Dev Firmware
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build-firmware:
+    name: Build Firmware
+    uses: esphome/workflows/.github/workflows/build.yml@2025.4.0
+    with:
+      #### Modify below here to match your project ####
+      files: |
+        wordclock-esp8266-d1-mini.dev.yaml
+      esphome-version: 2025.4.0
+      combined-name: wordclock
+      #### Modify above here to match your project ####
+
+  upload-to-release:
+    name: Upload to Release
+    needs:
+      - build-firmware
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4.3.0
+        with:
+          path: files
+
+      - name: Copy files to output
+        run: |-
+          shopt -s nullglob
+          mkdir output
+          version="${{ needs.build-firmware.outputs.version }}"
+          pushd files
+          for device in *; do
+            pushd $device
+            pushd $version
+            cp manifest.json ../../../output/$device.manifest.json
+            for bin in *.{bin,elf}; do
+              md5sum $bin | head -c 32 > ../../../output/$bin.md5
+              cp $bin ../../../output/
+            done
+            popd
+            popd
+          done
+          popd
+
+      - name: Upload files to release
+        uses: softprops/action-gh-release@v2.2.2
+        with:
+          files: output/*
+          tag_name: pre-release
+          prerelease: true
+          name: "Development Version: ${{ needs.build-firmware.outputs.version }}"
+          append_body: true

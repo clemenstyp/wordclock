@@ -11,18 +11,15 @@
    [esp8266@2.7.4 by ESP8266 Community](https://github.com/esp8266/Arduino)
 * [DS1307 RTC Module](https://lastminuteengineers.com/ds1307-rtc-arduino-tutorial/)
 
-## Healthcheck
-* [adafruit/FastLED@3.5.0 by Daniel Garcia](https://github.com/FastLED/FastLED)
 
-## WordClock
-* [adafruit/FastLED@3.5.0 by Daniel Garcia](https://github.com/FastLED/FastLED)
-* [NTPClient@3.2.1 by Fabrice Weinberg](https://github.com/arduino-libraries/NTPClient)
-* [WiFiManager@2.0.15-rc.1 by tzapu](https://github.com/tzapu/WiFiManager)
-* [ArduinoJson@6.20.0 by Benoit Blanchon](https://github.com/bblanchon/ArduinoJson)
-* [RTClib@2.1.1 by Adafruit](https://github.com/adafruit/RTClib)
+## Install / Update:
+
+[Install with ESP Web](https://clemenstyp.github.io/wordclock/)
+
 
 
 # Assemble
+
 [![Word-Clock - Die WLAN Wort-Uhr zum selber bauen](https://img.youtube.com/vi/FvAM1t0tISE/0.jpg)](https://www.youtube.com/watch?v=FvAM1t0tISE)
 
 # Connection
@@ -49,3 +46,11 @@ You can set a time offset to specify your timezone.
 ## Set DND
 You can set a time span in which the clock should be switched off.
 
+## Build localy:
+`docker run --rm --privileged -v "${PWD}":/config -it ghcr.io/esphome/esphome compile wordclock-esp8266-d1-mini.yaml`
+
+or install it with brew
+`brew install esphome`
+
+and run:
+`esphome compile wordclock-esp8266-d1-mini.yaml`

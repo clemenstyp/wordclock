@@ -1,6 +1,9 @@
 name: CI
 
 on:
+  # push:
+  #   # branches:
+  #   #   - develop
   pull_request:
     paths:
       - '*.yaml'
@@ -22,7 +25,7 @@ jobs:
       matrix:
         #### Modify below here to match your project ####
         file:
-          - wordclock
+          - wordclock-esp8266-d1-mini
         #### Modify above here to match your project ####
 
         esphome-version:

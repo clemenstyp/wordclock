@@ -15,7 +15,6 @@ jobs:
       #### Modify below here to match your project ####
       files: |
         wordclock-esp8266-d1-mini.factory.yaml
-        wordclock-esp32.factory.yaml
       esphome-version: 2025.4.0
       combined-name: wordclock
       #### Modify above here to match your project ####

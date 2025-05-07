@@ -1,0 +1,120 @@
+packages:
+  # Include all of the core configuration
+  core: !include wordclock-esp8266-d1-mini.factory.yaml
+
+debug:
+  update_interval: 5s
+
+text_sensor:
+  - platform: debug
+    device:
+      name: "Device Info"
+    reset_reason:
+      name: "Reset Reason"
+  - platform: template
+    name: "Current Time"
+    id: current_time_text
+    update_interval: 60s
+    icon: "mdi:clock-outline"
+    web_server: { sorting_weight: 30, sorting_group_id: "sorting_group_main" }   
+    lambda: |-
+      int timestamp_with_offset = id(sntp_time).now().timestamp;
+      if (id(manual_time).state){
+        timestamp_with_offset +=  int(id(time_offset));
+      }
+      auto time = ESPTime::from_epoch_local(timestamp_with_offset);
+      return  time.strftime("%Y-%m-%d %H:%M");
+
+sensor:
+  - platform: debug
+    free:
+      name: "Heap Free"
+    fragmentation:
+      name: "Heap Fragmentation"
+    block:
+      name: "Heap Max Block"
+    loop_time:
+      name: "Loop Time"
+  - platform: uptime
+    id: last_boot_time
+    type: timestamp
+    name: "Last Boot Time"
+    internal: false
+    disabled_by_default: false
+    entity_category: diagnostic
+  - platform: uptime
+    id: uptime_sensor
+    type: seconds
+    name: Uptime Sensor
+    update_interval: 60s
+    internal: false
+    disabled_by_default: false
+    entity_category: diagnostic
+  - platform: template
+    name: "Time Offset (in seconds)"
+    id: time_offset_text
+    update_interval: 60s
+    web_server: {sorting_weight: 32, sorting_group_id: "sorting_group_extra_settings" } 
+    lambda: |-
+      return id(time_offset);
+    icon: mdi:clock-start
+
+# # Logger must be at least debug (default)
+logger:
+  level: debug
+
+
+
+update:
+  - platform: http_request
+    id: firmware_update_beta
+    name: Beta Firmware Update
+    source: http://clemenstyp.github.io/wordclock/firmware-dev/wordclock.manifest.json
+    update_interval: 5h
+    icon: "mdi:test-tube"
+    web_server: { sorting_weight: 32, sorting_group_id: "sorting_group_advanced_settings" }
+
+button:
+  - platform: template
+    name: "Install Beta Update"
+    id: install_firmware_update_beta
+    web_server: { sorting_weight: 33, sorting_group_id: "sorting_group_advanced_settings" }
+    icon: "mdi:test-tube"
+    on_press:
+      - update.perform:
+          id: firmware_update_beta
+
+time:
+  - id: !extend ds1307_time
+    on_time:
+      # Every 1 second
+      - seconds: '*'
+        then:
+          - if:
+              condition:
+                # Same syntax for is_off
+                switch.is_on: test_run_status
+              then:
+                - lambda: |-
+                    id(time_offset) += 9;
+                    int timestamp_with_offset = id(sntp_time).now().timestamp + int(id(time_offset));
+                    auto time = ESPTime::from_epoch_local(timestamp_with_offset);
+                    ESP_LOGD("Time", "Testrun Time: %s", time.strftime("%Y-%m-%d %H:%M:%S").c_str());    
+                - if:
+                    condition:
+                      switch.is_off: manual_time
+                    then:
+                      - switch.turn_on: manual_time       
+
+switch:
+  - platform: template
+    id: test_run_status
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    name: "Test Run"
+    web_server: { sorting_weight: 90, sorting_group_id: "sorting_group_extra_settings" }
+    turn_on_action:
+      - switch.turn_on: manual_time
+    turn_off_action:
+      - switch.turn_off: manual_time
+    icon: mdi:clock-fast

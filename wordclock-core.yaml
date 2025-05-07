@@ -1,0 +1,58 @@
+substitutions:
+  devicename: wordclock
+  friendly_name: "WordClock"
+  fallback_hotspot_ssid: "WordClock"
+  fallback_hotspot_password: "47110815"
+
+esphome:
+  name: "${devicename}" 
+  friendly_name: "${friendly_name}"
+  comment: "$friendly_name - $devicename"
+  # name_add_mac_suffix: false
+  min_version: "2025.4.0"
+
+
+wifi:
+  reboot_timeout: 0min
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  # passive_scan: true
+  ap:
+    ssid: "${fallback_hotspot_ssid}"
+    password: "${fallback_hotspot_password}"
+    ap_timeout: 60s
+
+# # Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
+
+captive_portal:
+
+# Enable Web Server
+web_server:
+  port: 80
+  # local: false
+  version: 3
+  log: false
+  ota: true
+  sorting_groups:
+    - id: sorting_group_main    
+      name: "Clock Settings"
+      sorting_weight: 10
+    - id: sorting_group_color_settings
+      name: "Color settings"
+      sorting_weight: 20
+    - id: sorting_group_dnd_settings
+      name: "DnD settings"
+      sorting_weight: 30
+    - id: sorting_group_extra_settings
+      name: "Extra settings"
+      sorting_weight: 40
+    - id: sorting_group_advanced_settings
+      name: "Advanced settings"
+      sorting_weight: 50
