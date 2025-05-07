@@ -38,7 +38,7 @@ update:
     id: firmware_update
     name: Firmware Update
     source: https://clemenstyp.github.io/wordclock/firmware/wordclock.manifest.json
-    update_interval: 5h
+    update_interval: 6h
     icon: "mdi:cellphone-arrow-down"
     web_server: { sorting_weight: 30, sorting_group_id: "sorting_group_advanced_settings" }
 
