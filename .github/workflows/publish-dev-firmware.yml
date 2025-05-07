@@ -37,11 +37,12 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo
+            const tag = "${{ env.dev_tag }}"
             // Fetch the latest release information
             const latestRelease = await github.rest.repos.getReleaseByTag({
               owner,
               repo,
-              "${{ env.dev_tag }}",
+              tag,
             });
     
             // Check if the latest release information was successfully retrieved
