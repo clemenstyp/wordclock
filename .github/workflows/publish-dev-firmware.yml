@@ -33,7 +33,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/github-script@v7
+      - name: Delete old Release
+        uses: actions/github-script@v7
         with:
           script: |
             const { owner, repo } = context.repo
@@ -96,7 +97,7 @@ jobs:
       - name: Generate Changelog
         run: |
           last_version=$(git describe --tags --abbrev=0)
-          echo "# Changes since Version: ${last_version}" > ${{ github.workspace }}-CHANGELOG.txt
+          echo "# Changes since version ${last_version}" > ${{ github.workspace }}-CHANGELOG.txt
           #git log ${last_version}..HEAD --pretty=format:"%- %s" --date=short >> ${{ github.workspace }}-CHANGELOG.txt
           #git log ${last_version}..HEAD --oneline >> ${{ github.workspace }}-CHANGELOG.txt
           git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
