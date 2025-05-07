@@ -38,25 +38,29 @@ jobs:
           script: |
             const { owner, repo } = context.repo
             const tag = "${{ env.dev_tag }}"
-            // Fetch the latest release information
-            const latestRelease = await github.rest.repos.getReleaseByTag({
-              owner,
-              repo,
-              tag,
-            });
-    
-            // Check if the latest release information was successfully retrieved
-            if (latestRelease && latestRelease.data && latestRelease.data.id) {
-              // If there is a latest release, then delete it
-              await github.rest.repos.deleteRelease({
+            try{
+              // Fetch the latest release information
+              const latestRelease = await github.rest.repos.getReleaseByTag({
                 owner,
                 repo,
-                release_id: latestRelease.data.id,
+                tag,
               });
-              console.log(`Release id ${latestRelease.data.id} has been deleted.`);
-            } else {
-              // If no latest release was found or retrieval failed, output a message
-              console.log("No latest release found or failed to retrieve it.");
+      
+              // Check if the latest release information was successfully retrieved
+              if (latestRelease && latestRelease.data && latestRelease.data.id) {
+                // If there is a latest release, then delete it
+                await github.rest.repos.deleteRelease({
+                  owner,
+                  repo,
+                  release_id: latestRelease.data.id,
+                });
+                console.log(`Release id ${latestRelease.data.id} has been deleted.`);
+              } else {
+                // If no latest release was found or retrieval failed, output a message
+                console.log("No latest release found or failed to retrieve it.");
+              }
+            } catch (error) {
+              console.error(`Failed to retrieve or delete release: ${error}`);
             }
 
       - uses: actions/checkout@v3
