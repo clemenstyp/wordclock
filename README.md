@@ -53,4 +53,4 @@ or install it with brew
 `brew install esphome`
 
 and run:
-`esphome compile wordclock-esp8266-d1-mini.yaml`
+`esphome compile wordclock-esp8266-d1-mini.dev.yaml`
