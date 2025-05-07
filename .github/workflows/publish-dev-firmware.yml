@@ -41,7 +41,7 @@ jobs:
             const latestRelease = await github.rest.repos.getReleaseByTag({
               owner,
               repo,
-               ${{ env.dev_tag }}
+              "${{ env.dev_tag }}",
             });
     
             // Check if the latest release information was successfully retrieved
