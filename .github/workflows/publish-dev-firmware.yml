@@ -64,7 +64,6 @@ jobs:
       - name: Generate Changelog
         run: |
           last_version=$(git describe --tags --abbrev=0)
-          last_commit=$()
           echo "# Changes since Version: $last_version" > ${{ github.workspace }}-CHANGELOG.txt
           git log $last_version..HEAD --pretty=format:"%ad: %s" --date=short >> ${{ github.workspace }}-CHANGELOG.txt
       - name: Upload files to release
