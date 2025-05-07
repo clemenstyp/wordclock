@@ -33,6 +33,31 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo
+            // Fetch the latest release information
+            const latestRelease = await github.rest.repos.getReleaseByTag({
+              owner,
+              repo,
+               ${{ env.dev_tag }}
+            });
+    
+            // Check if the latest release information was successfully retrieved
+            if (latestRelease && latestRelease.data && latestRelease.data.id) {
+              // If there is a latest release, then delete it
+              await github.rest.repos.deleteRelease({
+                owner,
+                repo,
+                release_id: latestRelease.data.id,
+              });
+              console.log(`Release id ${latestRelease.data.id} has been deleted.`);
+            } else {
+              // If no latest release was found or retrieval failed, output a message
+              console.log("No latest release found or failed to retrieve it.");
+            }
+
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
