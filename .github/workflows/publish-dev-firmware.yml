@@ -75,7 +75,8 @@ jobs:
 
             // Call the async function
             deleteOldDevReleases();
-      - uses: actions/checkout@v3
+      - name: Checkout source code
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Download Artifact

@@ -1,3 +1,9 @@
+---
+layout: default
+---
+
+[Beta Version](./beta.html)
+
 # About
 
 Add some information about your project here.
@@ -6,8 +12,8 @@ Add some information about your project here.
 
 You can use the button below to install the pre-built firmware directly to your device via USB from the browser.
 
-<esp-web-install-button manifest="firmware/wordclock.manifest.json"></esp-web-install-button>
+<esp-web-install-button manifest="./firmware/wordclock.manifest.json"></esp-web-install-button>
 
-[Beta Version]({{ "/beta.html" | relative_url }})
+
 
 <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
