@@ -20,11 +20,36 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       artifact-prefix: ${{ steps.artifact-name.outputs.artifact-prefix }}
     steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Generate version
         id: version
         run: |
           version=dev-$(TZ='Europe/Berlin' date +'%Y%m%d-%H%M')
           echo version=$version >> $GITHUB_OUTPUT
+      - name: Generate Changelog
+        run: |
+          last_version=$(git tag --sort=taggerdate | grep -v '^dev-'  | head -n 1)
+          echo "## Beta Installation" > ${{ github.workspace }}-CHANGELOG.txt
+          echo "[Beta Install Page](https://clemenstyp.github.io/wordclock/beta.html)" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "## Changelog" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "<details><summary>Changes since version ${last_version}</summary><p>" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
+          do
+              commit_message=$(git log -1 --pretty=format:"%B" $hash)
+              echo "[$hash]: $commit_message" | sed 's/^/- /' >> ${{ github.workspace }}-CHANGELOG.txt
+          done
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "</p></details><summary></summary>" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo 'release_body<<EOF' >> $GITHUB_OUTPUT
+          cat ${{ github.workspace }}-CHANGELOG.txt >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
   build-firmware:
     name: Build Firmware
     needs: [prepare]
@@ -36,6 +61,8 @@ jobs:
       esphome-version: stable
       combined-name: wordclock
       
+      release-summary: ${{ needs.prepare.outputs.release_body }}
+      release-url: https://github.com/clemenstyp/wordclock/releases/tag/${{ needs.prepare.outputs.version }}
       release-version: ${{ needs.prepare.outputs.version }}
       #### Modify above here to match your project ####
 
