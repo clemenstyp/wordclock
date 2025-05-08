@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
-      changelog: ${{ steps.version.outputs.changelog }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
