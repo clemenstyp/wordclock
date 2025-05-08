@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: wordclock
 ---
 
 # WordClock Beta
@@ -13,6 +13,3 @@ You can use the button below to install the pre-built beta firmware directly to 
 <esp-web-install-button manifest="./beta-firmware/wordclock.manifest.json"></esp-web-install-button>
 
 <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
-
-
-[back](./)
