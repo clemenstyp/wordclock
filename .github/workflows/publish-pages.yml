@@ -48,6 +48,7 @@ jobs:
           echo last_dev_version_tag=$last_dev_version_tag >> $GITHUB_OUTPUT
 
       - name: Fetch firmware files
+        if: ${{ steps.version_tags.outputs.last_version_tag != '' }}
         uses: robinraju/release-downloader@v1.12
         with:
           tag: ${{ steps.version_tags.outputs.last_version_tag }}
@@ -55,6 +56,7 @@ jobs:
           out-file-path: output/firmware
 
       - name: Fetch dev firmware files
+        if: ${{ steps.version_tags.outputs.last_dev_version_tag != '' }}
         uses: robinraju/release-downloader@v1.12
         with:
           tag: ${{ steps.version_tags.outputs.last_dev_version_tag }}
@@ -62,6 +64,7 @@ jobs:
           out-file-path: output/beta-firmware
 
       - name: Upload artifact
+        if: ${{ ! cancelled() }}
         uses: actions/upload-pages-artifact@v3.0.1
         with:
           path: output

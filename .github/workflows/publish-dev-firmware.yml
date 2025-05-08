@@ -32,45 +32,49 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const { owner, repo } = context.repo
-            try{
+            const { owner, repo } = context.repo;
 
-              const repositoryTags = await github.rest.repos.listTags({
-                owner,
-                repo,
-              });
-              if (repositoryTags && repositoryTags.data){
-                repositoryTags.forEach(tag => {
-                  if (tag.name.startsWith('dev-')) {
-                    // Fetch the latest release information
-                    const taggedRelease = await github.rest.repos.getReleaseByTag({
-                      owner,
-                      repo,
-                      tag: tag.name,
-                    });
-            
-                    // Check if the latest release information was successfully retrieved
-                    if (taggedRelease && taggedRelease.data && taggedRelease.data.id) {
-                      // If there is a latest release, then delete it
-                      await github.rest.repos.deleteRelease({
+            // Wrap the logic in an async function
+            async function deleteOldDevReleases() {
+              try {
+                const repositoryTags = await github.rest.repos.listTags({
+                  owner,
+                  repo,
+                });
+
+                if (repositoryTags && repositoryTags.data) {
+                  for (const tag of repositoryTags.data) {
+                    if (tag.name.startsWith('dev-')) {
+                      // Fetch the latest release information
+                      const taggedRelease = await github.rest.repos.getReleaseByTag({
                         owner,
                         repo,
-                        release_id: taggedRelease.data.id,
+                        tag: tag.name,
                       });
-                      console.log(`Release id ${taggedRelease.data.id} has been deleted.`);
-                    } else {
-                      // If no latest release was found or retrieval failed, output a message
-                      console.log("No latest release found or failed to retrieve it.");
+
+                      // Check if the latest release information was successfully retrieved
+                      if (taggedRelease && taggedRelease.data && taggedRelease.data.id) {
+                        // If there is a latest release, then delete it
+                        await github.rest.repos.deleteRelease({
+                          owner,
+                          repo,
+                          release_id: taggedRelease.data.id,
+                        });
+                        console.log(`Release id ${taggedRelease.data.id} has been deleted.`);
+                      } else {
+                        // If no latest release was found or retrieval failed, output a message
+                        console.log("No latest release found or failed to retrieve it.");
+                      }
                     }
                   }
-                });
+                }
+              } catch (error) {
+                console.error(`Failed to retrieve or delete release: ${error}`);
               }
-              // Iterate over the tags
-              const tags = response.data;
-              
-            } catch (error) {
-              console.error(`Failed to retrieve or delete release: ${error}`);
             }
+
+            // Call the async function
+            deleteOldDevReleases();
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
