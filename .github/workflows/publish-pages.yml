@@ -42,20 +42,8 @@ jobs:
       - name: Get version tags
         id: version_tags
         run: |
-          git rev-list --tags --no-walk --reverse | while read commit; do
-            tag=$(git describe --tags --exact-match "$commit" 2>/dev/null)
-            if [[ $tag && $tag =~ ^[0-9] ]]; then
-              last_version_tag=$tag
-              break
-            fi
-          done
-          git rev-list --tags --no-walk --reverse | while read commit; do
-            tag=$(git describe --tags --exact-match "$commit" 2>/dev/null)
-            if [[ $tag && $tag == dev-* ]]; then
-              last_dev_version_tag=$tag
-              break
-            fi
-          done
+          last_version_tag=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git describe --tags --exact-match {} ' | grep -E '^[0-9]'  | head -n 1)
+          last_dev_version_tag=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git describe --tags --exact-match {} ' | grep  '^dev-'  | head -n 1)
           echo last_version_tag=$last_version_tag
           echo last_dev_version_tag=$last_dev_version_tag
 
