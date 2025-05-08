@@ -23,8 +23,8 @@ jobs:
       - name: Generate version
         id: version
         run: |
-          dev-version=dev-$(TZ='Europe/Berlin' date +'%Y-%m-%d-%H-%M')
-          echo dev-version=$dev-version >> $GITHUB_OUTPUT
+          version=dev-$(TZ='Europe/Berlin' date +'%Y-%m-%d-%H-%M')
+          echo version=$version >> $GITHUB_OUTPUT
   build-firmware:
     name: Build Firmware
     needs: [prepare]
@@ -36,7 +36,7 @@ jobs:
       esphome-version: stable
       combined-name: wordclock
       
-      release-version: ${{ needs.prepare.outputs.dev-version }}
+      release-version: ${{ needs.prepare.outputs.version }}
       #### Modify above here to match your project ####
 
   upload-to-release:
