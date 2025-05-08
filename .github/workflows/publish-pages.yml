@@ -42,8 +42,8 @@ jobs:
       - name: Get version tags
         id: version_tags
         run: |
-          last_version_tag=$(git tag --sort=taggerdate | grep -v '^dev-'  | head -n 1)
-          last_dev_version_tag=$(git tag --sort=taggerdate | grep  '^dev-'  | head -n 1)
+          last_version_tag=$(git tag --sort=-refname | grep -v '^dev-'  | head -n 1)
+          last_dev_version_tag=$(git tag --sort=-refname | grep  '^dev-'  | head -n 1)
 
           echo last_version_tag=$last_version_tag >> $GITHUB_OUTPUT
           echo last_dev_version_tag=$last_dev_version_tag >> $GITHUB_OUTPUT
