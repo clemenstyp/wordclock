@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - main
-
+    paths-ignore:
+      - 'static/**'
+      - '.github/workflows/publish-pages.yml'
+      
 permissions:
   contents: write
 
