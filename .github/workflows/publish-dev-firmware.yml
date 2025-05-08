@@ -16,9 +16,8 @@ jobs:
     name: Prepare
     runs-on: ubuntu-latest
     outputs:
-      files: ${{ steps.files-array.outputs.files }}
       version: ${{ steps.version.outputs.version }}
-      artifact-prefix: ${{ steps.artifact-name.outputs.artifact-prefix }}
+      changelog: ${{ steps.version.outputs.changelog }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -34,7 +33,7 @@ jobs:
         run: |
           last_version=$(git tag --sort=taggerdate | grep -v '^dev-'  | head -n 1)
           {
-            echo 'changelog_o<<EOF'
+            echo 'changelog<<EOF'
             echo "## Changes since version ${last_version}"
             echo "" 
             git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
@@ -45,7 +44,6 @@ jobs:
             echo ""
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
-          echo changelog="Change" >> $GITHUB_OUTPUT
   build-firmware:
     name: Build Firmware
     needs: [prepare]
