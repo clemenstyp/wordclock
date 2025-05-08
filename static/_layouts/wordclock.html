@@ -131,7 +131,7 @@
               }
               try {
                 const markdownContent = getValueByPath(data, 'builds.0.ota.summary', '');
-                const htmlContent = marked(markdownContent);
+                const htmlContent = marked.parse(markdownContent);
 
                 // Set the converted HTML content
                 document.getElementById('release_summary').innerHTML = htmlContent;
