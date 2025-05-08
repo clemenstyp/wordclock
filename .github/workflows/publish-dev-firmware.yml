@@ -30,9 +30,10 @@ jobs:
           version=dev-$(TZ='Europe/Berlin' date +'%Y%m%d-%H%M')
           echo version=$version >> $GITHUB_OUTPUT
       - name: Generate Changelog
+        id: changelog
         run: |
           last_version=$(git tag --sort=taggerdate | grep -v '^dev-'  | head -n 1)
-          echo 'release_body<<EOF' >> $GITHUB_OUTPUT
+          echo 'changelog<<EOF' >> $GITHUB_OUTPUT
           echo "## Changes since version ${last_version}" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
@@ -53,7 +54,7 @@ jobs:
       esphome-version: stable
       combined-name: wordclock
       
-      release-summary: '${{ needs.prepare.outputs.release_body }}'
+      release-summary: '${{ needs.prepare.outputs.changelog }}'
       release-url: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${{ needs.prepare.outputs.version }}
       release-version: ${{ needs.prepare.outputs.version }}
       #### Modify above here to match your project ####
