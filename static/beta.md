@@ -15,7 +15,7 @@ You can use the button below to install the pre-built beta firmware directly to 
 <br>
 Version: <span id="release_version"></span>
 <br>
-Release URL: <a href=""></a>
+Release URL: <a id="release_url" href=""></a>
 <br>
 
-<p id="release_summary"></p>
+<p><span id="release_summary"></span></p>
