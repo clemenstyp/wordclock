@@ -10,7 +10,7 @@ esphome:
     version: dev # This will be replaced by the github workflows with the `release` version
 
 debug:
-  update_interval: 5s
+  update_interval: 10s
 
 text_sensor:
   - platform: debug
@@ -103,7 +103,7 @@ time:
                 switch.is_on: test_run_status
               then:
                 - lambda: |-
-                    id(time_offset) += 9;
+                    id(time_offset) += 19;
                     int timestamp_with_offset = id(sntp_time).now().timestamp + int(id(time_offset));
                     auto time = ESPTime::from_epoch_local(timestamp_with_offset);
                     ESP_LOGD("Time", "Testrun Time: %s", time.strftime("%Y-%m-%d %H:%M:%S").c_str());    
