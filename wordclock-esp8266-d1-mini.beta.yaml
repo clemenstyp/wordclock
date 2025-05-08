@@ -77,7 +77,7 @@ update:
   - platform: http_request
     id: firmware_update_beta
     name: Beta Firmware Update
-    source: http://clemenstyp.github.io/wordclock/firmware-dev/wordclock.manifest.json
+    source: http://clemenstyp.github.io/wordclock/beta-firmware/wordclock.manifest.json
     update_interval: 1h
     icon: "mdi:test-tube"
     web_server: { sorting_weight: 32, sorting_group_id: "sorting_group_advanced_settings" }
