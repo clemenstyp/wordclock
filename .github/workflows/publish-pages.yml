@@ -42,8 +42,8 @@ jobs:
       - name: Get version tags
         id: version_tags
         run: |
-          last_version_tag=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git describe --tags --exact-match {} ' | grep -E '^[0-9]'  | head -n 1)
-          last_dev_version_tag=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git describe --tags --exact-match {} ' | grep  '^dev-'  | head -n 1)
+          last_version_tag=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep -E '^[0-9]'  | head -n 1)
+          last_dev_version_tag=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep  '^dev-'  | head -n 1)
           echo last_version_tag=$last_version_tag
           echo last_dev_version_tag=$last_dev_version_tag
 
