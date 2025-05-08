@@ -8,8 +8,6 @@ You can use the button below to install the pre-built firmware directly to your 
 
 <esp-web-install-button manifest="firmware/wordclock.manifest.json"></esp-web-install-button>
 
-
-# Install latest dev version:
-<esp-web-install-button manifest="firmware-dev/wordclock.manifest.json"></esp-web-install-button>
+[Beta Version]({{ "/beta.html" | relative_url }})
 
 <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
