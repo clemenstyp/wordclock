@@ -47,33 +47,37 @@ jobs:
 
                 if (repositoryTags && repositoryTags.data) {
                   for (const tag of repositoryTags.data) {
-                    console.log(`Found Tag with name: ${tag}.`);
-                    if (tag.startsWith('dev-')) {
-                      // Fetch the latest release information
-                      const taggedRelease = await github.rest.repos.getReleaseByTag({
-                        owner,
-                        repo,
-                        tag: tag,
-                      });
-
-                      // Check if the latest release information was successfully retrieved
-                      if (taggedRelease && taggedRelease.data && taggedRelease.data.id) {
-                        // If there is a latest release, then delete it
-                        await github.rest.repos.deleteRelease({
+                    console.log(`Found Tag with name: ${tag.name}.`);
+                    if (tag.name.startsWith('dev-')) {
+                      try {
+                        // Fetch the latest release information
+                        const taggedRelease = await github.rest.repos.getReleaseByTag({
                           owner,
                           repo,
-                          release_id: taggedRelease.data.id,
+                          tag: tag.name,
                         });
-                        console.log(`Release id ${taggedRelease.data.id} has been deleted.`);
-                      } else {
-                        // If no latest release was found or retrieval failed, output a message
-                        console.log("No latest release found or failed to retrieve it.");
+
+                        // Check if the latest release information was successfully retrieved
+                        if (taggedRelease && taggedRelease.data && taggedRelease.data.id) {
+                          // If there is a latest release, then delete it
+                          await github.rest.repos.deleteRelease({
+                            owner,
+                            repo,
+                            release_id: taggedRelease.data.id,
+                          });
+                          console.log(`Release id ${taggedRelease.data.id} has been deleted.`);
+                        } else {
+                          // If no latest release was found or retrieval failed, output a message
+                          console.log("No latest release found or failed to retrieve it.");
+                        }
+                      } catch (error) {
+                        console.error(`Failed to retrieve or delete tag: ${tag.name} - error: ${error}`);
                       }
                     }
                   }
                 }
               } catch (error) {
-                console.error(`Failed to retrieve or delete release: ${error}`);
+                console.error(`Failed to list tags - error: ${error}`);
               }
             }
 
