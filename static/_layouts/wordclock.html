@@ -105,10 +105,26 @@
               const data = await response.json();
   
               // Update the webpage content
-              document.getElementById('release_version').textContent = getValueByPath(data, 'version', 'unknown');
-              document.getElementById('release_url').href = getValueByPath(data, 'builds.ota.release_url', 'https://github.com/clemenstyp/wordclock/releases');
-              document.getElementById('release_url').textContent = getValueByPath(data, 'builds.ota.release_url', 'https://github.com/clemenstyp/wordclock/releases');
-              document.getElementById('release_summary').textContent = getValueByPath(data, 'builds.ota.summary', '');
+              try {
+                document.getElementById('release_version').textContent = getValueByPath(data, 'version', 'unknown');
+              } catch (error) {
+                  console.error('Error setting data:', error);
+              }
+              try {
+                document.getElementById('release_url').setAttribute('href', getValueByPath(data, 'builds.ota.release_url', 'https://github.com/clemenstyp/wordclock/releases'));
+              } catch (error) {
+                  console.error('Error setting data:', error);
+              }
+              try {
+                document.getElementById('release_url').textContent = getValueByPath(data, 'builds.ota.release_url', 'https://github.com/clemenstyp/wordclock/releases');
+              } catch (error) {
+                  console.error('Error setting data:', error);
+              }
+              try {
+                document.getElementById('release_summary').textContent = getValueByPath(data, 'builds.ota.summary', '');
+              } catch (error) {
+                  console.error('Error setting data:', error);
+              }
           } catch (error) {
               console.error('Error fetching data:', error);
           }
