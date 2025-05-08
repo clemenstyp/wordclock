@@ -47,9 +47,10 @@ jobs:
 
                 if (repositoryTags && repositoryTags.data) {
                   for (const tag of repositoryTags.data) {
-                    console.log(`Found Tag with name: ${tag.name}.`);
+                   
                     if (tag.name.startsWith('dev-')) {
                       try {
+                        console.log(`Try to remove Tag with name: ${tag.name}.`);
                         // Fetch the latest release information
                         const taggedRelease = await github.rest.repos.getReleaseByTag({
                           owner,
@@ -115,14 +116,18 @@ jobs:
           echo "## Installation" > ${{ github.workspace }}-CHANGELOG.txt
           echo "[Beta Install Page](https://clemenstyp.github.io/wordclock/beta.html)" >> ${{ github.workspace }}-CHANGELOG.txt
           echo "" >> ${{ github.workspace }}-CHANGELOG.txt
-
-          echo "## Changes since version ${last_version}" > ${{ github.workspace }}-CHANGELOG.txt
+          echo "## Changelog" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "<details><summary>Changes since version ${last_version}</summary><p>" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
           git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
           do
               commit_message=$(git log -1 --pretty=format:"%B" $hash)
               echo "- $hash"
               echo "$commit_message" | sed 's/^/- /' >> ${{ github.workspace }}-CHANGELOG.txt
           done
+          echo "</p></details><summary></summary>" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
       - name: Upload files to release
         uses: softprops/action-gh-release@v2.2.2
         with:
