@@ -119,14 +119,13 @@ jobs:
           echo "## Changelog" >> ${{ github.workspace }}-CHANGELOG.txt
           echo "" >> ${{ github.workspace }}-CHANGELOG.txt
           echo "<details><summary>Changes since version ${last_version}</summary><p>" >> ${{ github.workspace }}-CHANGELOG.txt
-          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "<ul>" >> ${{ github.workspace }}-CHANGELOG.txt
           git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
           do
               commit_message=$(git log -1 --pretty=format:"%B" $hash)
-              echo "- $hash"
-              echo "$commit_message" | sed 's/^/- /' >> ${{ github.workspace }}-CHANGELOG.txt
+              echo "<li> [$hash] - $commit_message</li>" | sed 's/^/- /' >> ${{ github.workspace }}-CHANGELOG.txt
           done
-          echo "</p></details><summary></summary>" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "</ul></p></details><summary></summary>" >> ${{ github.workspace }}-CHANGELOG.txt
           echo "" >> ${{ github.workspace }}-CHANGELOG.txt
       - name: Upload files to release
         uses: softprops/action-gh-release@v2.2.2
