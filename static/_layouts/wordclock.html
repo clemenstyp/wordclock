@@ -62,9 +62,9 @@
     <script>
 
       /**
-       * Retrieves the value from a JSON object by a given path.
+       * Retrieves the value from a JSON object by a given path, including array indices.
        * @param {Object} obj - The JSON object to query.
-       * @param {string} path - The dot-separated path to the desired property.
+       * @param {string} path - The dot-separated path to the desired property. Use numbers for array indices.
        * @param {*} defaultValue - The default value to return if the path does not exist.
        * @returns {*} The value at the specified path or the default value.
        */
@@ -73,15 +73,23 @@
           let current = obj;
 
           for (const key of keys) {
-              if (current[key] === undefined) {
+              if (current === undefined) {
                   return defaultValue;
               }
-              current = current[key];
+
+              // Check if the key is a number, indicating an array index
+              const index = parseInt(key, 10);
+              if (!isNaN(index)) {
+                  // Access array index if current is an array
+                  current = Array.isArray(current) ? current[index] : undefined;
+              } else {
+                  // Access object property if current is an object
+                  current = current[key];
+              }
           }
 
-          return current;
+          return current === undefined ? defaultValue : current;
       }
-      // URL of the JSON data
 
       const espButtons = document.getElementsByTagName('esp-web-install-button');
             
@@ -111,17 +119,17 @@
                   console.error('Error setting data:', error);
               }
               try {
-                document.getElementById('release_url').setAttribute('href', getValueByPath(data, 'builds.ota.release_url', 'https://github.com/clemenstyp/wordclock/releases'));
+                document.getElementById('release_url').setAttribute('href', getValueByPath(data, 'builds.0.ota.release_url', 'https://github.com/clemenstyp/wordclock/releases'));
               } catch (error) {
                   console.error('Error setting data:', error);
               }
               try {
-                document.getElementById('release_url').textContent = getValueByPath(data, 'builds.ota.release_url', 'https://github.com/clemenstyp/wordclock/releases');
+                document.getElementById('release_url').textContent = getValueByPath(data, 'builds.0.ota.release_url', 'https://github.com/clemenstyp/wordclock/releases');
               } catch (error) {
                   console.error('Error setting data:', error);
               }
               try {
-                document.getElementById('release_summary').textContent = getValueByPath(data, 'builds.ota.summary', '');
+                document.getElementById('release_summary').textContent = getValueByPath(data, 'builds.0.ota.summary', '');
               } catch (error) {
                   console.error('Error setting data:', error);
               }
