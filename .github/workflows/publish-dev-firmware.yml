@@ -32,6 +32,7 @@ jobs:
       - name: Generate Changelog
         id: changelog
         run: |
+          last_version=$(git tag --sort=taggerdate | grep -v '^dev-'  | head -n 1)
           {
             echo 'CHANGELOG<<EOF'
             echo "## Changes since version ${last_version}"
@@ -42,7 +43,7 @@ jobs:
                 echo "[$hash]: $commit_message" | sed 's/^/- /'
             done
             echo ""
-            echo EOF
+            echo 'EOF'
           } >> "$GITHUB_OUTPUT"
   build-firmware:
     name: Build Firmware
