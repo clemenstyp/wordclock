@@ -47,12 +47,13 @@ jobs:
 
                 if (repositoryTags && repositoryTags.data) {
                   for (const tag of repositoryTags.data) {
-                    if (tag.name.startsWith('dev-')) {
+                    console.log(`Found Tag with name: ${tag}.`);
+                    if (tag.startsWith('dev-')) {
                       // Fetch the latest release information
                       const taggedRelease = await github.rest.repos.getReleaseByTag({
                         owner,
                         repo,
-                        tag: tag.name,
+                        tag: tag,
                       });
 
                       // Check if the latest release information was successfully retrieved
