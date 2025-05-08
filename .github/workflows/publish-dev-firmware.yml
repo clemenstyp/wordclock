@@ -34,7 +34,7 @@ jobs:
         run: |
           last_version=$(git tag --sort=taggerdate | grep -v '^dev-'  | head -n 1)
           {
-            echo 'CHANGELOG<<EOF'
+            echo 'changelog_o<<EOF'
             echo "## Changes since version ${last_version}"
             echo "" 
             git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
@@ -45,6 +45,7 @@ jobs:
             echo ""
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
+          echo changelog="Change" >> $GITHUB_OUTPUT
   build-firmware:
     name: Build Firmware
     needs: [prepare]
@@ -56,7 +57,7 @@ jobs:
       esphome-version: stable
       combined-name: wordclock
       
-      release-summary: '${{ needs.prepare.outputs.CHANGELOG }}'
+      release-summary: '${{ needs.prepare.outputs.changelog }}'
       release-url: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${{ needs.prepare.outputs.version }}
       release-version: ${{ needs.prepare.outputs.version }}
       #### Modify above here to match your project ####
