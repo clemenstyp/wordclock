@@ -13,9 +13,10 @@ You can use the button below to install the pre-built firmware directly to your 
 
  <esp-web-install-button id='esp-button' manifest="./firmware/wordclock.manifest.json"></esp-web-install-button>
 
-<ul>
-    <li>Version: <span id="release_version"></span>></li>
-    <li>Release URL: <a href=""></a></li>
-</ul>
+<br>
+Version: <span id="release_version"></span>
+<br>
+Release URL: <a href=""></a>
+<br>
 
 <p id="release_summary"></p>
