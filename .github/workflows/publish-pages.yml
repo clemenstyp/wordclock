@@ -56,8 +56,8 @@ jobs:
               break
             fi
           done
-          #last_version_tag=$(git tag --sort=-refname | grep -v '^dev-'  | head -n 1)
-          #last_dev_version_tag=$(git tag --sort=-refname | grep  '^dev-'  | head -n 1)
+          echo last_version_tag=$last_version_tag
+          echo last_dev_version_tag=$last_dev_version_tag
 
           echo last_version_tag=$last_version_tag >> $GITHUB_OUTPUT
           echo last_dev_version_tag=$last_dev_version_tag >> $GITHUB_OUTPUT
