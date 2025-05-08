@@ -48,18 +48,7 @@
       <section>
 
       {{ content }}
-      {% if page.manifest %}
-      {% if page.manifest != '' %}
-      <esp-web-install-button id='esp-button' manifest="{% page.manifest %}"></esp-web-install-button>
 
-      <ul>
-        <li>Version: <span id="release_version"></span>></li>
-        <li>Release URL: <a href=""></a></li>
-      </ul>
-
-      <p id="release_summary"></p>
-      {% endif %}
-      {% endif %}
       </section>
       <footer>
         {% if site.github.is_project_page %}
@@ -69,8 +58,6 @@
       </footer>
     </div>
     <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
-    {% if page.manifest %}
-    {% if page.manifest != '' %}
     <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
     <script>
 
@@ -95,13 +82,24 @@
           return current;
       }
       // URL of the JSON data
-      const jsonUrl = '{% page.manifest %}';
+
+      const espButtons = document.getElementsByTagName('esp-web-install-button');
+            
+      // Check if any elements were found
+      if (espButtons.length > 0) {
+          const manifestUrl = espButtons[0].getAttribute('manifest');
+          console.log('Manifest URL:', manifestUrl);
+          fetchAndUpdate(manifestUrl);
+      } else {
+          console.log('No esp-web-install-button elements found.');
+          return null;
+      }
   
       // Function to fetch and update the webpage
-      async function fetchAndUpdate() {
+      async function fetchAndUpdate(manifestUrl) {
           try {
               // Fetch the JSON data
-              const response = await fetch(jsonUrl);
+              const response = await fetch(manifestUrl);
               if (!response.ok) {
                   throw new Error('Network response was not ok');
               }
@@ -118,9 +116,7 @@
       }
   
       // Call the function to update content
-      fetchAndUpdate();
+      
     </script>
-    {% endif %}
-    {% endif %}
   </body>
 </html>
