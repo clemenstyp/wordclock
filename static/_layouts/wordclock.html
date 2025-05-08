@@ -48,7 +48,18 @@
       <section>
 
       {{ content }}
+      {% if site.manifest %}
+      {% if site.manifest != '' %}
+      <esp-web-install-button id='esp-button' manifest="{% site.manifest %}"></esp-web-install-button>
 
+      <ul>
+        <li>Version: <span id="release_version"></span>></li>
+        <li>Release URL: <a href=""></a></li>
+      </ul>
+
+      <p id="release_summary"></p>
+      {% endif %}
+      {% endif %}
       </section>
       <footer>
         {% if site.github.is_project_page %}
@@ -58,5 +69,58 @@
       </footer>
     </div>
     <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
+    {% if site.manifest %}
+    {% if site.manifest != '' %}
+    <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+    <script>
+
+      /**
+       * Retrieves the value from a JSON object by a given path.
+       * @param {Object} obj - The JSON object to query.
+       * @param {string} path - The dot-separated path to the desired property.
+       * @param {*} defaultValue - The default value to return if the path does not exist.
+       * @returns {*} The value at the specified path or the default value.
+       */
+      function getValueByPath(obj, path, defaultValue) {
+          const keys = path.split('.');
+          let current = obj;
+
+          for (const key of keys) {
+              if (current[key] === undefined) {
+                  return defaultValue;
+              }
+              current = current[key];
+          }
+
+          return current;
+      }
+      // URL of the JSON data
+      const jsonUrl = '{% site.manifest %}';
+  
+      // Function to fetch and update the webpage
+      async function fetchAndUpdate() {
+          try {
+              // Fetch the JSON data
+              const response = await fetch(jsonUrl);
+              if (!response.ok) {
+                  throw new Error('Network response was not ok');
+              }
+              const data = await response.json();
+  
+              // Update the webpage content
+              document.getElementById('release_version').textContent = getValueByPath(data, 'version', 'unknown');
+              document.getElementById('release_url').href = getValueByPath(data, 'builds.ota.release_url', 'https://github.com/clemenstyp/wordclock/releases');
+              document.getElementById('release_url').textContent = getValueByPath(data, 'builds.ota.release_url', 'https://github.com/clemenstyp/wordclock/releases');
+              document.getElementById('release_summary').textContent = getValueByPath(data, 'builds.ota.summary', '');
+          } catch (error) {
+              console.error('Error fetching data:', error);
+          }
+      }
+  
+      // Call the function to update content
+      fetchAndUpdate();
+    </script>
+    {% endif %}
+    {% endif %}
   </body>
 </html>

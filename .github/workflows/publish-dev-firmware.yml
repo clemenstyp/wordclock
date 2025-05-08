@@ -23,7 +23,7 @@ jobs:
       - name: Generate version
         id: version
         run: |
-          version=dev-$(TZ='Europe/Berlin' date +'%Y-%m-%d-%H-%M')
+          version=dev-$(TZ='Europe/Berlin' date +'%Y%m%d-%H%M')
           echo version=$version >> $GITHUB_OUTPUT
   build-firmware:
     name: Build Firmware
@@ -135,13 +135,14 @@ jobs:
           echo "## Changelog" >> ${{ github.workspace }}-CHANGELOG.txt
           echo "" >> ${{ github.workspace }}-CHANGELOG.txt
           echo "<details><summary>Changes since version ${last_version}</summary><p>" >> ${{ github.workspace }}-CHANGELOG.txt
-          echo "<ul>" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
           git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
           do
               commit_message=$(git log -1 --pretty=format:"%B" $hash)
-              echo "<li> [$hash] - $commit_message</li>" | sed 's/^/- /' >> ${{ github.workspace }}-CHANGELOG.txt
+              echo "[$hash]: $commit_message" | sed 's/^/- /' >> ${{ github.workspace }}-CHANGELOG.txt
           done
-          echo "</ul></p></details><summary></summary>" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "</p></details><summary></summary>" >> ${{ github.workspace }}-CHANGELOG.txt
           echo "" >> ${{ github.workspace }}-CHANGELOG.txt
       - name: Upload files to release
         uses: softprops/action-gh-release@v2.2.2
@@ -149,5 +150,5 @@ jobs:
           files: output/*
           tag_name: ${{ needs.build-firmware.outputs.version }}
           prerelease: true
-          name: "Development Version: ${{ needs.build-firmware.outputs.version }}"
+          name: "Dev-Version: ${{ needs.build-firmware.outputs.version }}"
           body_path: ${{ github.workspace }}-CHANGELOG.txt
