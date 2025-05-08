@@ -30,7 +30,7 @@ text_sensor:
     update_interval: 600s
     web_server: { sorting_weight: 32, sorting_group_id: "sorting_group_main" }   
     lambda: |-
-      return { ESPHOME_PROJECT_VERSION " " + App.get_compilation_time() };
+      return { ESPHOME_PROJECT_VERSION };
 
   - platform: template
     name: "Software Project Name"

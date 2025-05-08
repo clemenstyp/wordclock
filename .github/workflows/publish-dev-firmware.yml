@@ -12,8 +12,22 @@ permissions:
   contents: write
 
 jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    outputs:
+      files: ${{ steps.files-array.outputs.files }}
+      version: ${{ steps.version.outputs.version }}
+      artifact-prefix: ${{ steps.artifact-name.outputs.artifact-prefix }}
+    steps:
+      - name: Generate version
+        id: version
+        run: |
+          dev-version=dev-$(TZ='Europe/Berlin' date +'%Y-%m-%d-%H-%M')
+          echo dev-version=$dev-version >> $GITHUB_OUTPUT
   build-firmware:
     name: Build Firmware
+    needs: [prepare]
     uses: esphome/workflows/.github/workflows/build.yml@2025.4.0
     with:
       #### Modify below here to match your project ####
@@ -21,6 +35,8 @@ jobs:
         wordclock-esp8266-d1-mini.dev.yaml
       esphome-version: stable
       combined-name: wordclock
+      
+      release-version: ${{ needs.prepare.outputs.dev-version }}
       #### Modify above here to match your project ####
 
   upload-to-release:
