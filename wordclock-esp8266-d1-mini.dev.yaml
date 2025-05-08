@@ -70,7 +70,8 @@ sensor:
 logger:
   level: debug
 
-
+web_server:
+  log: true
 
 update:
   - platform: http_request
