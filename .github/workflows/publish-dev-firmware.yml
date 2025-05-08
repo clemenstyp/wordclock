@@ -26,23 +26,24 @@ jobs:
           fetch-depth: 0
       - name: Generate version
         id: version
-        run: |
+        run: |-
           version=dev-$(TZ='Europe/Berlin' date +'%Y%m%d-%H%M')
           echo version=$version >> $GITHUB_OUTPUT
       - name: Generate Changelog
         id: changelog
         run: |
-          last_version=$(git tag --sort=taggerdate | grep -v '^dev-'  | head -n 1)
-          echo 'changelog<<EOF' >> $GITHUB_OUTPUT
-          echo "## Changes since version ${last_version}" >> $GITHUB_OUTPUT
-          echo "" >> $GITHUB_OUTPUT
-          git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
-          do
-              commit_message=$(git log -1 --pretty=format:"%B" $hash)
-              echo "[$hash]: $commit_message" | sed 's/^/- /' >> $GITHUB_OUTPUT
-          done
-          echo "" >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
+          {
+            echo 'CHANGELOG<<EOF'
+            echo "## Changes since version ${last_version}"
+            echo "" 
+            git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
+            do
+                commit_message=$(git log -1 --pretty=format:"%B" $hash)
+                echo "[$hash]: $commit_message" | sed 's/^/- /'
+            done
+            echo ""
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
   build-firmware:
     name: Build Firmware
     needs: [prepare]
@@ -54,7 +55,7 @@ jobs:
       esphome-version: stable
       combined-name: wordclock
       
-      release-summary: '${{ needs.prepare.outputs.changelog }}'
+      release-summary: '${{ needs.prepare.outputs.CHANGELOG }}'
       release-url: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${{ needs.prepare.outputs.version }}
       release-version: ${{ needs.prepare.outputs.version }}
       #### Modify above here to match your project ####
