@@ -48,9 +48,9 @@
       <section>
 
       {{ content }}
-      {% if site.manifest %}
-      {% if site.manifest != '' %}
-      <esp-web-install-button id='esp-button' manifest="{% site.manifest %}"></esp-web-install-button>
+      {% if page.manifest %}
+      {% if page.manifest != '' %}
+      <esp-web-install-button id='esp-button' manifest="{% page.manifest %}"></esp-web-install-button>
 
       <ul>
         <li>Version: <span id="release_version"></span>></li>
@@ -69,8 +69,8 @@
       </footer>
     </div>
     <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
-    {% if site.manifest %}
-    {% if site.manifest != '' %}
+    {% if page.manifest %}
+    {% if page.manifest != '' %}
     <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
     <script>
 
@@ -95,7 +95,7 @@
           return current;
       }
       // URL of the JSON data
-      const jsonUrl = '{% site.manifest %}';
+      const jsonUrl = '{% page.manifest %}';
   
       // Function to fetch and update the webpage
       async function fetchAndUpdate() {
