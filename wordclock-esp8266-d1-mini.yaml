@@ -44,7 +44,7 @@ update:
   - platform: http_request
     id: firmware_update_beta
     name: Firmware (Beta)
-    source: http://clemenstyp.github.io/wordclock/beta-firmware/wordclock.manifest.json
+    source: https://clemenstyp.github.io/wordclock/beta-firmware/wordclock.manifest.json
     update_interval: 6h
     icon: "mdi:test-tube"
     disabled_by_default: true
@@ -59,9 +59,12 @@ button:
     disabled_by_default: true
     entity_category: config
     on_press:
-      - update.perform:
-          id: firmware_update_beta
-          force_update: true
+      # - update.perform:
+      #     id: firmware_update_beta
+      #     force_update: true
+      - ota.http_request.flash:
+          md5_url: https://clemenstyp.github.io/wordclock/beta-firmware/wordclock-esp8266.ota.bin.md5
+          url: https://clemenstyp.github.io/wordclock/beta-firmware/wordclock-esp8266.ota.bin
   - platform: template
     name: "Install latest Firmware"
     id: install_firmware_update
@@ -70,9 +73,13 @@ button:
     disabled_by_default: true
     entity_category: config
     on_press:
-      - update.perform:
-          id: firmware_update
-          force_update: true
+      # - update.perform:
+      #     id: firmware_update
+      #     force_update: true
+      - ota.http_request.flash:
+          md5_url: https://clemenstyp.github.io/wordclock/firmware/wordclock-esp8266.ota.bin.md5
+          url: https://clemenstyp.github.io/wordclock/firmware/wordclock-esp8266.ota.bin
+
 
 sensor:
   - platform: uptime
