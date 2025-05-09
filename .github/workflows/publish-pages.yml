@@ -52,6 +52,7 @@ jobs:
 
       - name: Fetch firmware files
         if: ${{ steps.version_tags.outputs.last_version_tag != '' }}
+        continue-on-error: true
         uses: robinraju/release-downloader@v1.12
         with:
           tag: ${{ steps.version_tags.outputs.last_version_tag }}
@@ -60,6 +61,7 @@ jobs:
 
       - name: Fetch dev firmware files
         if: ${{ steps.version_tags.outputs.last_dev_version_tag != '' }}
+        continue-on-error: true
         uses: robinraju/release-downloader@v1.12
         with:
           tag: ${{ steps.version_tags.outputs.last_dev_version_tag }}
