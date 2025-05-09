@@ -36,9 +36,15 @@ jobs:
             echo 'changelog<<EOF'
             echo "## Changes since version ${last_version}"
             echo "" 
+            commit_lines=0
             git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
             do
-                commit_message=$(git log -1 --pretty=format:"%B" $hash)
+                 if [ "$commit_lines" -gt 5 ]; then
+                   echo "..."
+                    break
+                 fi
+                 ((commit_lines+=1))
+                 commit_message=$(git log -1 --pretty=format:"%B" $hash)
                 echo "[$hash]: $commit_message" | sed 's/^/- /'
             done
             echo ""
