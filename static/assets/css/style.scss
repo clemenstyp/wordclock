@@ -8,11 +8,11 @@
 //a:hover:not(.downloads a), a:focus:not(.downloads a)
 a:hover, a:focus {
   font-weight: unset;
-  text-shadow: 0 0 0px;
+  text-shadow: 0 0 0px, 0 0 0px;
 }
 
 a {
   text-decoration: none;
-  transition: text-shadow 10.2s;
+  transition: text-shadow 0.2s;
 }
 
