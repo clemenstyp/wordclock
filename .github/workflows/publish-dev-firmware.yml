@@ -38,17 +38,14 @@ jobs:
             echo 'changelog<<EOF'
             echo "## Changes since version ${last_version}"
             echo "" 
-            commit_lines=0
-            git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
-            do
-                 if [ "$commit_lines" -gt 5 ]; then
-                   echo "..."
-                   break
-                 fi
-                 ((commit_lines+=1))
-                 commit_message=$(git log -1 --pretty=format:"%B" $hash)
-                 echo "[$hash]: $commit_message" | sed 's/^/- /'
-            done
+            commit_messages=$(git log ${last_version}..HEAD --pretty=format:"%B")
+            # Process each line to add '-' if the line is not empty and doesn't start with a space or a '-', and remove empty lines
+            commit_messages=$(echo "$commit_messages" | awk '{if ($0 !~ /^ *$/ && $0 !~ /^[- ]/) print "- " $0; else if ($0 !~ /^ *$/) print $0}')
+            if [ ${#commit_messages} -gt 500 ]; then
+              echo "${commit_messages:0:500}[...]"
+            else
+              echo "$commit_messages"
+            fi
             echo ""
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
