@@ -41,8 +41,8 @@ jobs:
             commit_messages=$(git log ${last_version}..HEAD --pretty=format:"%B")
             # Process each line to add '-' if the line is not empty and doesn't start with a space or a '-', and remove empty lines
             commit_messages=$(echo "$commit_messages" | awk '{if ($0 !~ /^ *$/ && $0 !~ /^[- ]/) print "- " $0; else if ($0 !~ /^ *$/) print $0}')
-            if [ ${#commit_messages} -gt 500 ]; then
-              echo "${commit_messages:0:500}[...]"
+            if [ ${#commit_messages} -gt 100 ]; then
+              echo "${commit_messages:0:100}[...]"
             else
               echo "$commit_messages"
             fi
