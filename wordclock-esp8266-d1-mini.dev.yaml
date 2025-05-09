@@ -20,19 +20,6 @@ text_sensor:
     reset_reason:
       name: "Reset Reason"
       web_server: { sorting_weight: 23, sorting_group_id: "sorting_group_diagnostic" }   
-  - platform: template
-    name: "Current Time"
-    id: current_time_text
-    update_interval: 60s
-    icon: "mdi:clock-outline"
-    web_server: { sorting_weight: 30, sorting_group_id: "sorting_group_main" }   
-    lambda: |-
-      int timestamp_with_offset = id(sntp_time).now().timestamp;
-      if (id(manual_time).state){
-        timestamp_with_offset +=  int(id(time_offset));
-      }
-      auto time = ESPTime::from_epoch_local(timestamp_with_offset);
-      return  time.strftime("%Y-%m-%d %H:%M");
 
 sensor:
   - platform: debug

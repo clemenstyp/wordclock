@@ -109,6 +109,7 @@ switch:
     icon: "mdi:file-word-box-outline"
     web_server: { sorting_weight: 12, sorting_group_id: "sorting_group_extra_settings" }
     entity_category: config
+
 button:
   - platform: factory_reset
     id: factory_reset_button
@@ -132,21 +133,48 @@ sensor:
     icon: mdi:clock-start
     entity_category: ""
 
-datetime:
+text_sensor:
   - platform: template
-    id: current_datetime
-    type: datetime
-    name: Manual Time
+    name: "Current Time"
+    id: current_time_text
     update_interval: 60s
-    web_server: {sorting_weight: 31, sorting_group_id: "sorting_group_extra_settings" }
+    icon: "mdi:clock-outline"
+    web_server: { sorting_weight: 29, sorting_group_id: "sorting_group_extra_settings" }
     lambda: |-
-      int timestamp_with_offset = id(sntp_time).now().timestamp + int(id(time_offset));
+      int timestamp_with_offset = id(sntp_time).now().timestamp;
+      if (id(manual_time).state){
+        timestamp_with_offset +=  int(id(time_offset));
+      }
       auto time = ESPTime::from_epoch_local(timestamp_with_offset);
-      return time;
-    set_action:
-      - lambda: |-
-          id(time_offset) = int(x.timestamp - id(sntp_time).now().timestamp);
+      return  time.strftime("%Y-%m-%d %H:%M");
+
+datetime:
+  # - platform: template
+  #   id: manual_datetime
+  #   type: datetime
+  #   name: Set Manual Time
+  #   update_interval: 60s
+  #   web_server: {sorting_weight: 31, sorting_group_id: "sorting_group_extra_settings" }
+  #   icon: "mdi:clock-edit-outline"
+  #   lambda: |-
+  #     int timestamp_with_offset = id(sntp_time).now().timestamp + int(id(time_offset));
+  #     auto time = ESPTime::from_epoch_local(timestamp_with_offset);
+  #     return time;
+  #   set_action:
+  #     - lambda: |-
+  #         id(time_offset) = int(x.timestamp - id(sntp_time).now().timestamp);
+  - platform: template
+    id: manual_datetime
+    type: datetime
+    name: Set Manual Time
+    optimistic: true
+    web_server: {sorting_weight: 31, sorting_group_id: "sorting_group_extra_settings" }
     icon: "mdi:clock-edit-outline"
+    initial_value: "2025-01-01 09:00:00"
+    on_value:
+      then:
+        lambda: |-
+          id(time_offset) = int(x.timestamp - id(sntp_time).now().timestamp);
   - platform: template
     id: dim_up_start_time
     type: time
