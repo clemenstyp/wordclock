@@ -57,14 +57,7 @@ sensor:
     internal: false
     disabled_by_default: false
     entity_category: diagnostic
-  - platform: template
-    name: "Time Offset (in seconds)"
-    id: time_offset_text
-    update_interval: 60s
-    web_server: {sorting_weight: 32, sorting_group_id: "sorting_group_extra_settings" } 
-    lambda: |-
-      return id(time_offset);
-    icon: mdi:clock-start
+
 
 # # Logger must be at least debug (default)
 logger:
@@ -73,24 +66,7 @@ logger:
 web_server:
   log: true
 
-update:
-  - platform: http_request
-    id: firmware_update_beta
-    name: Beta Firmware Update
-    source: http://clemenstyp.github.io/wordclock/beta-firmware/wordclock.manifest.json
-    update_interval: 1h
-    icon: "mdi:test-tube"
-    web_server: { sorting_weight: 32, sorting_group_id: "sorting_group_advanced_settings" }
 
-button:
-  - platform: template
-    name: "Install Beta Update"
-    id: install_firmware_update_beta
-    web_server: { sorting_weight: 33, sorting_group_id: "sorting_group_advanced_settings" }
-    icon: "mdi:test-tube"
-    on_press:
-      - update.perform:
-          id: firmware_update_beta
 
 time:
   - id: !extend ds1307_time
@@ -125,3 +101,9 @@ switch:
     turn_off_action:
       - switch.turn_off: manual_time
     icon: mdi:clock-fast
+    entity_category: diagnostic
+
+update:
+  - id: !extend firmware_update_beta
+    update_interval: 1h
+    disabled_by_default: false

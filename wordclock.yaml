@@ -92,6 +92,7 @@ switch:
     restore_mode: RESTORE_DEFAULT_ON
     icon: "mdi:file-word-box-outline"
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_extra_settings" }
+    entity_category: config
   - platform: template
     name: "Indication: Minutes"
     id: indication_minutes
@@ -99,6 +100,7 @@ switch:
     restore_mode: RESTORE_DEFAULT_ON
     icon: "mdi:file-word-box-outline"
     web_server: { sorting_weight: 11, sorting_group_id: "sorting_group_extra_settings" }
+    entity_category: config
   - platform: template
     name: "Indication: Week Days"
     id: indication_week_days
@@ -106,7 +108,7 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     icon: "mdi:file-word-box-outline"
     web_server: { sorting_weight: 12, sorting_group_id: "sorting_group_extra_settings" }
-
+    entity_category: config
 button:
   - platform: factory_reset
     id: factory_reset_button
@@ -116,6 +118,17 @@ button:
     id: restart_button
     name: Restart Word Clock
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_advanced_settings" }
+
+sensor:
+  - platform: template
+    name: "Time Offset (in seconds)"
+    id: time_offset_text
+    update_interval: 60s
+    web_server: {sorting_weight: 32, sorting_group_id: "sorting_group_extra_settings" } 
+    lambda: |-
+      return id(time_offset);
+    icon: mdi:clock-start
+    entity_category: ""
 
 datetime:
   - platform: template

@@ -41,13 +41,35 @@ update:
     update_interval: 6h
     icon: "mdi:cellphone-arrow-down"
     web_server: { sorting_weight: 30, sorting_group_id: "sorting_group_advanced_settings" }
+  - platform: http_request
+    id: firmware_update_beta
+    name: Beta Firmware Update
+    source: http://clemenstyp.github.io/wordclock/beta-firmware/wordclock.manifest.json
+    update_interval: 6h
+    icon: "mdi:test-tube"
+    disabled_by_default: true
+    web_server: { sorting_weight: 32, sorting_group_id: "sorting_group_advanced_settings" }
 
 button:
   - platform: template
-    name: "Install Update"
+    name: "Install latest Beta Firmware"
+    id: install_firmware_update_beta
+    web_server: { sorting_weight: 36, sorting_group_id: "sorting_group_advanced_settings" }
+    icon: "mdi:test-tube"
+    disabled_by_default: true
+    entity_category: config
+    on_press:
+      - update.perform:
+          id: firmware_update_beta
+          force_update: true
+  - platform: template
+    name: "Install latest Firmware"
     id: install_firmware_update
-    web_server: { sorting_weight: 31, sorting_group_id: "sorting_group_advanced_settings" }
+    web_server: { sorting_weight: 35, sorting_group_id: "sorting_group_advanced_settings" }
     icon: "mdi:cellphone-arrow-down"
+    disabled_by_default: true
+    entity_category: config
     on_press:
       - update.perform:
           id: firmware_update
+          force_update: true
