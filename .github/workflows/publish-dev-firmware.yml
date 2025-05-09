@@ -31,7 +31,7 @@ jobs:
       - name: Generate Changelog
         id: changelog
         run: |
-          last_version_tag=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep -E '^[0-9]'  | head -n 1)
+          last_version=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep -E '^[0-9]'  | head -n 1)
           {
             echo 'changelog<<EOF'
             echo "## Changes since version ${last_version}"
@@ -155,7 +155,7 @@ jobs:
           popd
       - name: Generate Changelog
         run: |
-          last_version_tag=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep -E '^[0-9]'  | head -n 1)
+          last_version=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep -E '^[0-9]'  | head -n 1)
           echo "## Beta Installation" > ${{ github.workspace }}-CHANGELOG.txt
           echo "[Beta Install Page](https://clemenstyp.github.io/wordclock/beta.html)" >> ${{ github.workspace }}-CHANGELOG.txt
           echo "" >> ${{ github.workspace }}-CHANGELOG.txt
