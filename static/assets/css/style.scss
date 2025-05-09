@@ -1,0 +1,16 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+/* Solution for Inline elements shifting when made bold on hover*/
+/* from: https://stackoverflow.com/questions/556153/inline-elements-shifting-when-made-bold-on-hover/20249560#20249560 */
+/* The pseudo element has the same content and hover style, so it pre-sets the width of the element and visibility: hidden hides the pseudo element from actual view. */
+a::before {
+    display: block;
+    content: attr(title);
+    font-weight: bold;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+}
