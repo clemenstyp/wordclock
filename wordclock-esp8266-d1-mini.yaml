@@ -52,7 +52,7 @@ update:
 
 button:
   - platform: template
-    name: "Install latest Beta Firmware"
+    name: "Install Beta Firmware"
     id: install_firmware_update_beta
     web_server: { sorting_weight: 36, sorting_group_id: "sorting_group_update" }
     icon: "mdi:test-tube"
@@ -66,7 +66,7 @@ button:
           md5_url: https://clemenstyp.github.io/wordclock/beta-firmware/wordclock-esp8266.ota.bin.md5
           url: https://clemenstyp.github.io/wordclock/beta-firmware/wordclock-esp8266.ota.bin
   - platform: template
-    name: "Install latest Firmware"
+    name: "Install Firmware"
     id: install_firmware_update
     web_server: { sorting_weight: 35, sorting_group_id: "sorting_group_update" }
     icon: "mdi:cellphone-arrow-down"

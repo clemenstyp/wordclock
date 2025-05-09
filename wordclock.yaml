@@ -86,7 +86,7 @@ switch:
     icon: "mdi:brightness-auto"
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_dnd_settings" }
   - platform: template
-    name: "Indication: It is"
+    name: "Show: It is"
     id: indication_it_is
     optimistic: true
     restore_mode: RESTORE_DEFAULT_ON
@@ -94,7 +94,7 @@ switch:
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_extra_settings" }
     entity_category: config
   - platform: template
-    name: "Indication: Minutes"
+    name: "Show: Minutes"
     id: indication_minutes
     optimistic: true
     restore_mode: RESTORE_DEFAULT_ON
@@ -102,7 +102,7 @@ switch:
     web_server: { sorting_weight: 11, sorting_group_id: "sorting_group_extra_settings" }
     entity_category: config
   - platform: template
-    name: "Indication: Week Days"
+    name: "Show: Week Days"
     id: indication_week_days
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
@@ -124,7 +124,7 @@ button:
 
 sensor:
   - platform: template
-    name: "Time Offset (in seconds)"
+    name: "Time Offset (seconds)"
     id: time_offset_text
     update_interval: 60s
     web_server: {sorting_weight: 32, sorting_group_id: "sorting_group_extra_settings" } 
@@ -178,7 +178,7 @@ datetime:
   - platform: template
     id: dim_up_start_time
     type: time
-    name: Dim-Up Start
+    name: Dim-Up Begin
     optimistic: yes
     initial_value: "06:00:00"
     restore_value: true
@@ -196,7 +196,7 @@ datetime:
   - platform: template
     id: dim_down_start_time
     type: time
-    name: Dim-Down Start
+    name: Dim-Down Begin
     optimistic: yes
     initial_value: "18:00:00"
     restore_value: true
