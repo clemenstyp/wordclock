@@ -9,43 +9,6 @@ esphome:
     name: clemensTyp.WordClock-Beta
     version: dev # This will be replaced by the github workflows with the `release` version
 
-debug:
-  update_interval: 10s
-
-text_sensor:
-  - platform: debug
-    device:
-      name: "Device Info"
-      web_server: { sorting_weight: 11, sorting_group_id: "sorting_group_diagnostic" }   
-    reset_reason:
-      name: "Reset Reason"
-      web_server: { sorting_weight: 23, sorting_group_id: "sorting_group_diagnostic" }   
-
-sensor:
-  - platform: debug
-    free:
-      name: "Heap Free"
-      web_server: { sorting_weight: 41, sorting_group_id: "sorting_group_diagnostic" }   
-    fragmentation:
-      name: "Heap Fragmentation"
-      web_server: { sorting_weight: 43, sorting_group_id: "sorting_group_diagnostic" }   
-    block:
-      name: "Heap Max Block"
-      web_server: { sorting_weight: 42, sorting_group_id: "sorting_group_diagnostic" }   
-    loop_time:
-      name: "Loop Time"
-      web_server: { sorting_weight: 24, sorting_group_id: "sorting_group_diagnostic" }   
-
-
-
-# # Logger must be at least debug (default)
-logger:
-  level: debug
-
-web_server:
-  log: true
-
-
 
 time:
   - id: !extend ds1307_time
