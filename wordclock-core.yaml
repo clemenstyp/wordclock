@@ -42,17 +42,20 @@ web_server:
   ota: true
   sorting_groups:
     - id: sorting_group_main    
-      name: "Clock Settings"
+      name: "General Settings"
       sorting_weight: 10
-    - id: sorting_group_color_settings
-      name: "Color settings"
-      sorting_weight: 20
     - id: sorting_group_dnd_settings
-      name: "DnD settings"
+      name: "Automatic Brightness"
       sorting_weight: 30
     - id: sorting_group_extra_settings
-      name: "Extra settings"
+      name: "Extra Settings"
       sorting_weight: 40
     - id: sorting_group_advanced_settings
-      name: "Advanced settings"
+      name: "Advanced Functions"
       sorting_weight: 50
+    - id: sorting_group_update
+      name: "Software Update"
+      sorting_weight: 60
+    - id: sorting_group_diagnostic    
+      name: "Diagnostic"
+      sorting_weight: 70

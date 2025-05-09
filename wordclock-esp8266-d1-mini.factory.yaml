@@ -28,7 +28,7 @@ text_sensor:
     icon: "mdi:information-box"
     entity_category: "diagnostic"
     update_interval: 600s
-    web_server: { sorting_weight: 32, sorting_group_id: "sorting_group_main" }   
+    web_server: { sorting_weight: 12, sorting_group_id: "sorting_group_update" }   
     lambda: |-
       return { ESPHOME_PROJECT_VERSION };
 
@@ -38,7 +38,7 @@ text_sensor:
     icon: "mdi:information-box"
     entity_category: "diagnostic"
     update_interval: 600s
-    web_server: { sorting_weight: 31, sorting_group_id: "sorting_group_main" }   
+    web_server: { sorting_weight: 11, sorting_group_id: "sorting_group_update" }   
     lambda: |-
       return { ESPHOME_PROJECT_NAME };
 

@@ -79,7 +79,7 @@ switch:
     web_server: { sorting_weight: 30, sorting_group_id: "sorting_group_extra_settings" }
     icon: "mdi:clock-edit-outline"
   - platform: template
-    name: "Automatic Brightness"
+    name: "Auto Brightness"
     id: automatic_brightness
     optimistic: true
     restore_mode: RESTORE_DEFAULT_ON
@@ -113,10 +113,12 @@ button:
   - platform: factory_reset
     id: factory_reset_button
     name: Factory Reset Word Clock
+    disabled_by_default: true
     web_server: { sorting_weight: 20, sorting_group_id: "sorting_group_advanced_settings" }
   - platform: restart
     id: restart_button
     name: Restart Word Clock
+    disabled_by_default: true
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_advanced_settings" }
 
 sensor:
@@ -146,36 +148,36 @@ datetime:
           id(time_offset) = int(x.timestamp - id(sntp_time).now().timestamp);
     icon: "mdi:clock-edit-outline"
   - platform: template
-    id: morning_transition_start_time
+    id: dim_up_start_time
     type: time
-    name: Morning Transition Start Time
+    name: Dim-Up Start
     optimistic: yes
     initial_value: "06:00:00"
     restore_value: true
     web_server: { sorting_weight: 33, sorting_group_id: "sorting_group_dnd_settings" }   
     icon: "mdi:weather-sunset-up"
   - platform: template
-    id: morning_transition_end_time
+    id: dim_up_end_time
     type: time
-    name: Morning Transition End Time
+    name: Dim-Up End
     optimistic: yes
     initial_value: "09:00:00"
     restore_value: true
     web_server: { sorting_weight: 34, sorting_group_id: "sorting_group_dnd_settings" }
     icon: "mdi:weather-sunny"
   - platform: template
-    id: night_transition_start_time
+    id: dim_down_start_time
     type: time
-    name: Night Transition Start Time
+    name: Dim-Down Start
     optimistic: yes
     initial_value: "18:00:00"
     restore_value: true
     web_server: { sorting_weight: 31, sorting_group_id: "sorting_group_dnd_settings" }
     icon: "mdi:weather-sunset-down"
   - platform: template
-    id: night_transition_end_time
+    id: dim_down_end_time
     type: time
-    name: Night Transition End Time
+    name: Dim-Down End
     optimistic: yes
     initial_value: "22:00:00"
     restore_value: true
@@ -209,24 +211,24 @@ script:
                   auto time = ESPTime::from_epoch_local(timestamp_with_offset);
                   int time_minute_of_day = (time.hour * 60) + time.minute % 1440;
             
-                  int morning_transition_start_minute_of_day = (id(morning_transition_start_time).hour * 60) + id(morning_transition_start_time).minute;
-                  int morning_transition_end_minute_of_day = ( id(morning_transition_end_time).hour * 60) +  id(morning_transition_end_time).minute;
-                  int night_transition_start_minute_of_day = (id(night_transition_start_time).hour * 60) + id(night_transition_start_time).minute;
-                  int night_transition_end_minute_of_day = (id(night_transition_end_time).hour * 60) + id(night_transition_end_time).minute;
+                  int dim_up_start_minute_of_day = (id(dim_up_start_time).hour * 60) + id(dim_up_start_time).minute;
+                  int dim_up_end_minute_of_day = ( id(dim_up_end_time).hour * 60) +  id(dim_up_end_time).minute;
+                  int dim_down_start_minute_of_day = (id(dim_down_start_time).hour * 60) + id(dim_down_start_time).minute;
+                  int dim_down_end_minute_of_day = (id(dim_down_end_time).hour * 60) + id(dim_down_end_time).minute;
 
 
-                  if (time_minute_of_day >= night_transition_end_minute_of_day || time_minute_of_day < morning_transition_start_minute_of_day) {
+                  if (time_minute_of_day >= dim_down_end_minute_of_day || time_minute_of_day < dim_up_start_minute_of_day) {
                     brightness = min_brightness;  // Low brightness at night
-                  } else if (time_minute_of_day >= night_transition_start_minute_of_day ) {
+                  } else if (time_minute_of_day >= dim_down_start_minute_of_day ) {
                     // Calculate evening brightness based on time difference
-                    float total_duration = float(night_transition_end_minute_of_day - night_transition_start_minute_of_day);
-                    float time_passed = float(time_minute_of_day - night_transition_start_minute_of_day);    
+                    float total_duration = float(dim_down_end_minute_of_day - dim_down_start_minute_of_day);
+                    float time_passed = float(time_minute_of_day - dim_down_start_minute_of_day);    
 
                     brightness = max_brightness - ((max_brightness - min_brightness) * (time_passed / total_duration));  // Gradually decrease brightness
-                  } else if (time_minute_of_day < morning_transition_end_minute_of_day) {
+                  } else if (time_minute_of_day < dim_up_end_minute_of_day) {
                     // Calculate evening brightness based on time difference
-                    float total_duration = float(morning_transition_end_minute_of_day - morning_transition_start_minute_of_day);
-                    float time_passed = float(time_minute_of_day - morning_transition_start_minute_of_day);
+                    float total_duration = float(dim_up_end_minute_of_day - dim_up_start_minute_of_day);
+                    float time_passed = float(time_minute_of_day - dim_up_start_minute_of_day);
                                         
                     brightness = min_brightness + ((max_brightness - min_brightness) * (time_passed / total_duration));  // Gradually increse brightness
                   } 
@@ -245,7 +247,7 @@ number:
     icon: "mdi:transition"
     web_server: { sorting_weight: 20, sorting_group_id: "sorting_group_main" }
   - platform: template
-    name: "Minimum Brightness"
+    name: "Min Brightness"
     id: minimum_brightness
     optimistic: True
     min_value: 0.0
@@ -267,7 +269,7 @@ number:
           id: set_auto_brightness
           transition_length: 50
   - platform: template
-    name: "Maximum Brightness"
+    name: "Max Brightness"
     id: maximum_brightness
     optimistic: True
     min_value: 0.01
@@ -310,13 +312,13 @@ light:
                 - light.is_on: word_clock
             then:
               - delay: 10ms
-              # Enforce the light effect to be at "ClockEffect"
+              # Enforce the light effect to be at "WordClock"
               - light.control:
                   id: word_clock
-                  effect: ClockEffect
+                  effect: WordClock
     effects:
       - addressable_lambda:
-          name: "ClockEffect"
+          name: "WordClock"
           update_interval: 20ms
           lambda: |-
             static uint8_t previousMinutes;
