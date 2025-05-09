@@ -73,3 +73,22 @@ button:
       - update.perform:
           id: firmware_update
           force_update: true
+
+sensor:
+  - platform: uptime
+    id: last_boot_time
+    type: timestamp
+    name: "Last Boot Time"
+    internal: false
+    disabled_by_default: false
+    entity_category: diagnostic
+    web_server: { sorting_weight: 21, sorting_group_id: "sorting_group_diagnostic" }   
+  - platform: uptime
+    id: uptime_sensor
+    type: seconds
+    name: Uptime Sensor
+    update_interval: 60s
+    internal: false
+    disabled_by_default: false
+    entity_category: diagnostic
+    web_server: { sorting_weight: 22, sorting_group_id: "sorting_group_diagnostic" }
