@@ -23,6 +23,7 @@ jobs:
         #### Modify below here to match your project ####
         file:
           - wordclock-esp8266-d1-mini
+          - wordclock-esp8266-d1-mini-dev
         #### Modify above here to match your project ####
 
         esphome-version:

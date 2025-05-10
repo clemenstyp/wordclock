@@ -60,8 +60,8 @@ jobs:
       esphome-version: stable
       combined-name: wordclock
       
-      release-summary: '${{ needs.prepare.outputs.changelog }}'
-      release-url: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${{ needs.prepare.outputs.version }}
+      #release-summary: '${{ needs.prepare.outputs.changelog }}'
+      #release-url: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${{ needs.prepare.outputs.version }}
       release-version: ${{ needs.prepare.outputs.version }}
       #### Modify above here to match your project ####
 
