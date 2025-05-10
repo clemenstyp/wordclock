@@ -31,6 +31,10 @@ i2c:
   scl: ${i2c_scl_pin}
   scan: false
   id: i2c_bus
+  frequency: 300kHz
+
+preferences:
+  flash_write_interval: 20s
 
 time:
   - platform: ds1307
@@ -149,20 +153,6 @@ text_sensor:
       return  time.strftime("%Y-%m-%d %H:%M");
 
 datetime:
-  # - platform: template
-  #   id: manual_datetime
-  #   type: datetime
-  #   name: Set Manual Time
-  #   update_interval: 60s
-  #   web_server: {sorting_weight: 31, sorting_group_id: "sorting_group_extra_settings" }
-  #   icon: "mdi:clock-edit-outline"
-  #   lambda: |-
-  #     int timestamp_with_offset = id(sntp_time).now().timestamp + int(id(time_offset));
-  #     auto time = ESPTime::from_epoch_local(timestamp_with_offset);
-  #     return time;
-  #   set_action:
-  #     - lambda: |-
-  #         id(time_offset) = int(x.timestamp - id(sntp_time).now().timestamp);
   - platform: template
     id: manual_datetime
     type: datetime
