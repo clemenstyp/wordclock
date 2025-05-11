@@ -19,3 +19,24 @@ dashboard_import:
 # Sets up the improv via serial client for Wi-Fi provisioning.
 # Handy if your device has a usb port for the user to add credentials when they first get it.
 improv_serial:
+
+text_sensor:
+  - platform: template
+    name: "Software Version"
+    id: esphome_project_version_text_short
+    icon: "mdi:information-box"
+    entity_category: "diagnostic"
+    update_interval: 600s
+    web_server: { sorting_weight: 12, sorting_group_id: "sorting_group_update" }   
+    lambda: |-
+      return { ESPHOME_PROJECT_VERSION };
+
+  - platform: template
+    name: "Software Project Name"
+    id: esphome_project_name
+    icon: "mdi:information-box"
+    entity_category: "diagnostic"
+    update_interval: 600s
+    web_server: { sorting_weight: 11, sorting_group_id: "sorting_group_update" }   
+    lambda: |-
+      return { ESPHOME_PROJECT_NAME };
