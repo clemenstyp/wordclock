@@ -337,7 +337,7 @@ light:
     effects:
       - addressable_lambda:
           name: "WordClock"
-          update_interval: 20ms
+          update_interval: 50ms
           lambda: |-
             static uint8_t previousMinutes;
             static uint8_t letters[2][126];
@@ -399,21 +399,21 @@ light:
 
             /*
              * Below is the transition control of the clock to change to the next time (next 5 minute section).
-             * The update_interval is 20ms, which would mean that it takes 50 iterations in total to fade to the next time over a 1 second period.
+             * The update_interval is 50ms, which would mean that it takes 20 iterations in total to fade to the next time over a 1 second period.
              * The transition slider specifies the number of seconds the total fade takes (id: transition).
-             * The value of the transition is multiplied by 50 (steps) to create the fader.
+             * The value of the transition is multiplied by 20 (steps) to create the fader.
              */
 
             if (initial_run) {
               it.all() = Color::BLACK;
               std::fill_n(letters[0], 126, 0);
               std::fill_n(letters[1], 126, 0);
-              currentFade = int(50*id(transition).state);
-              fadeTransition = int(50*id(transition).state);
+              currentFade = int(20*id(transition).state);
+              fadeTransition = int(20*id(transition).state);
               currentRound = 0;
             }
             // update fadeTransition if value is changed
-            auto trans = int(50*id(transition).state);
+            auto trans = int(20*id(transition).state);
             if (trans != fadeTransition) {
               fadeTransition = trans;
               if (currentFade > fadeTransition){
