@@ -8,8 +8,30 @@ permissions:
   contents: write
 
 jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.changelog.outputs.changelog }}
+    steps:
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          release_body=${{ github.event.release.body }}
+          {
+            echo 'changelog<<EOF'
+            release_body=$(echo "$release_body" | awk '{if ($0 !~ /^ *$/ && $0 !~ /^[- ]/) print "- " $0; else if ($0 !~ /^ *$/) print $0}')
+            if [ ${#release_body} -gt 100 ]; then
+              echo "${release_body:0:100}[...]"
+            else
+              echo "$release_body"
+            fi
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
   build-firmware:
     name: Build Firmware
+    needs: [prepare]
     uses: esphome/workflows/.github/workflows/build.yml@2025.4.0
     with:
       #### Modify below here to match your project ####
@@ -18,9 +40,9 @@ jobs:
       esphome-version: stable #2025.4.0
       combined-name: wordclock
       #### Modify above here to match your project ####
-
+      release-summary: '${{ needs.prepare.outputs.changelog }}'
       #release-summary: ${{ github.event.release.body }}
-      #release-url: ${{ github.event.release.html_url }}
+      release-url: ${{ github.event.release.html_url }}
       release-version: ${{ github.event.release.tag_name }}
 
   upload-to-release:
