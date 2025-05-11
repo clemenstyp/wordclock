@@ -14,9 +14,9 @@ debug:
 
 text_sensor:
   - platform: debug
-    device:
-      name: "Device Info"
-      web_server: { sorting_weight: 11, sorting_group_id: "sorting_group_diagnostic" }   
+    # device:
+    #   name: "Device Info"
+    #   web_server: { sorting_weight: 11, sorting_group_id: "sorting_group_diagnostic" }   
     reset_reason:
       name: "Reset Reason"
       web_server: { sorting_weight: 23, sorting_group_id: "sorting_group_diagnostic" }   
@@ -26,12 +26,12 @@ sensor:
     free:
       name: "Heap Free"
       web_server: { sorting_weight: 41, sorting_group_id: "sorting_group_diagnostic" }   
-    fragmentation:
-      name: "Heap Fragmentation"
-      web_server: { sorting_weight: 43, sorting_group_id: "sorting_group_diagnostic" }   
-    block:
-      name: "Heap Max Block"
-      web_server: { sorting_weight: 42, sorting_group_id: "sorting_group_diagnostic" }   
+    # fragmentation:
+    #   name: "Heap Fragmentation"
+    #   web_server: { sorting_weight: 43, sorting_group_id: "sorting_group_diagnostic" }   
+    # block:
+    #   name: "Heap Max Block"
+    #   web_server: { sorting_weight: 42, sorting_group_id: "sorting_group_diagnostic" }   
     loop_time:
       name: "Loop Time"
       web_server: { sorting_weight: 24, sorting_group_id: "sorting_group_diagnostic" }   
