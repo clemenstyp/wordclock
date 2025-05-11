@@ -20,11 +20,14 @@ packages:
 esp8266:
   board: d1_mini
   restore_from_flash: true
+  framework:
+    version: 3.0.2
 
 http_request:
   useragent: esphome/device
-  timeout: 10s
+  timeout: 3s
   verify_ssl: false
+  esp8266_disable_ssl_support: true
 
 ota:
   - platform: http_request
