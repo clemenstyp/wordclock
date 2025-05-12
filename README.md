@@ -54,3 +54,6 @@ or install it with brew
 
 and run:
 `esphome compile wordclock-esp8266-d1-mini.dev.yaml`
+
+or use the docker sh script:
+`./esphome.sh compile wor`
