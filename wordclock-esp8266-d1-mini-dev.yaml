@@ -49,7 +49,7 @@ switch:
     icon: mdi:clock-fast
     entity_category: diagnostic
 
-update:
-  - id: !extend firmware_update_beta
-    update_interval: 1h
-    disabled_by_default: false
+# update:
+#   - id: !extend firmware_update_beta
+#     update_interval: 1h
+#     disabled_by_default: false
