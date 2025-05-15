@@ -20,16 +20,10 @@ esphome:
             red: !lambda "return id(word_clock_color_red);"
             green: !lambda "return id(word_clock_color_green);"
             blue: !lambda "return id(word_clock_color_blue);"
-    - priority: -100
-      then:
-        - light.control:
-            id: word_clock
-            effect: WordClock
-            state: on
-            brightness: !lambda "return id(word_clock_brightness);"
-            red: !lambda "return id(word_clock_color_red);"
-            green: !lambda "return id(word_clock_color_green);"
-            blue: !lambda "return id(word_clock_color_blue);"
+        - script.execute: 
+            id: set_auto_brightness
+            transition_length: 0
+
 # example boot priority:
 # 800.0: This is where all hardware initialization of vital components is executed. For example setting switches to their initial state.
 # 600.0: This is where most sensors are set up.
