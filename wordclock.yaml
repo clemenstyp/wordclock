@@ -17,6 +17,7 @@ esphome:
         - light.control:
             id: word_clock
             effect: WordClock
+            state: on
             brightness: !lambda "return id(word_clock_brightness)/255;"
             red: !lambda "return id(word_clock_color_red)/255;"
             green: !lambda "return id(word_clock_color_green)/255;"
@@ -180,13 +181,21 @@ button:
     name: Restart Word Clock
     disabled_by_default: true
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_advanced_settings" }
+  - platform: template
+    name: "Set Manual Time"
+    id: manual_datetime_update
+    on_press:
+      - lambda: |-
+            id(time_offset) = int(id(manual_datetime).state_as_esptime().timestamp - id(sntp_time).now().timestamp);
+    web_server: {sorting_weight: 32, sorting_group_id: "sorting_group_extra_settings" }
+    icon: "mdi:clock-edit-outline"
 
 sensor:
   - platform: template
     name: "Time Offset (seconds)"
     id: time_offset_text
     update_interval: 60s
-    web_server: {sorting_weight: 32, sorting_group_id: "sorting_group_extra_settings" } 
+    web_server: {sorting_weight: 33, sorting_group_id: "sorting_group_extra_settings" } 
     lambda: |-
       return id(time_offset);
     icon: mdi:clock-start
@@ -211,15 +220,11 @@ datetime:
   - platform: template
     id: manual_datetime
     type: datetime
-    name: Set Manual Time
+    name: Manual Time
     optimistic: true
     web_server: {sorting_weight: 31, sorting_group_id: "sorting_group_extra_settings" }
     icon: "mdi:clock-edit-outline"
     initial_value: "2025-01-01 09:00:00"
-    on_value:
-      then:
-        lambda: |-
-          id(time_offset) = int(x.timestamp - id(sntp_time).now().timestamp);
   - platform: template
     id: dim_up_start_time
     type: time
@@ -523,7 +528,7 @@ light:
     num_leds: 126 
     default_transition_length: 1s
     icon: "mdi:file-word-box-outline"
-    # restore_mode: RESTORE_DEFAULT_ON
+    restore_mode: ALWAYS_ON
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_main" }
     on_state:
       then:
