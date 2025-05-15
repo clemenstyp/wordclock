@@ -527,7 +527,7 @@ light:
     num_leds: 126 
     default_transition_length: 1s
     icon: "mdi:file-word-box-outline"
-    restore_mode: ALWAYS_ON
+    #restore_mode: ALWAYS_ON
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_main" }
     on_state:
       then:
