@@ -10,10 +10,8 @@ esphome:
       # read the RTC time once when the system boots
         - ds1307.read_time:
            id: ds1307_time
-    - priority: 580
+    - priority: 780
       then:
-        - light.turn_on: word_clock
-        - delay: 10ms
         - light.control:
             id: word_clock
             effect: WordClock
