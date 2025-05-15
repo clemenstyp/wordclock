@@ -12,7 +12,7 @@ esphome:
            id: ds1307_time
     - priority: 780
       then:
-        - light.control:
+        - light.turn_on:
             id: word_clock
             effect: WordClock
             state: on
