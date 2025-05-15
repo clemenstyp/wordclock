@@ -10,7 +10,7 @@ esphome:
       # read the RTC time once when the system boots
         - ds1307.read_time:
            id: ds1307_time
-    - priority: 400
+    - priority: 780
       then:
         - light.control:
             id: word_clock
@@ -118,11 +118,11 @@ globals:
   - id: word_clock_color_green
     type: float
     restore_value: yes
-    initial_value: '0.8'
+    initial_value: '0.54'
   - id: word_clock_color_blue
     type: float
     restore_value: yes
-    initial_value: '0.8'
+    initial_value: '0.05'
   - id: word_clock_brightness
     type: float
     restore_value: yes
