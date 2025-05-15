@@ -13,6 +13,14 @@ esphome:
     - priority: 780
       then:
         - light.turn_on: word_clock
+        - delay: 10ms
+        - light.control:
+            id: word_clock
+            effect: WordClock
+            brightness: !lambda "return id(word_clock_brightness);"
+            red: !lambda "return id(word_clock_color_red);"
+            green: !lambda "return id(word_clock_color_green);"
+            blue: !lambda "return id(word_clock_color_blue);"
 
 # example boot priority:
 # 800.0: This is where all hardware initialization of vital components is executed. For example setting switches to their initial state.
@@ -96,6 +104,22 @@ globals:
     type: uint8_t[126]
     restore_value: no
 
+  - id: word_clock_color_red
+    type: uint8_t
+    restore_value: yes
+    initial_value: '255'
+  - id: word_clock_color_green
+    type: uint8_t
+    restore_value: yes
+    initial_value: '255'
+  - id: word_clock_color_blue
+    type: uint8_t
+    restore_value: yes
+    initial_value: '255'
+  - id: word_clock_brightness
+    type: uint8_t
+    restore_value: yes
+    initial_value: '150'
 
 switch:
   - platform: template
@@ -112,6 +136,14 @@ switch:
     restore_mode: RESTORE_DEFAULT_ON
     icon: "mdi:brightness-auto"
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_dnd_settings" }
+    on_turn_off:
+      - globals.set:
+          id: word_clock_brightness
+          value: !lambda "return id(word_clock).remote_values.get_brightness();"
+    on_turn_on:
+      - script.execute: 
+          id: set_auto_brightness
+          transition_length: 1000
   - platform: template
     name: "Show: It is"
     id: indication_it_is
@@ -443,7 +475,7 @@ number:
     min_value: 0.0
     max_value: 1
     step: 0.01
-    initial_value: 0.1
+    initial_value: 0.3
     restore_value: True
     icon: "mdi:brightness-4"
     web_server: { sorting_weight: 11, sorting_group_id: "sorting_group_dnd_settings" }
@@ -491,7 +523,7 @@ light:
     num_leds: 126 
     default_transition_length: 1s
     icon: "mdi:file-word-box-outline"
-    restore_mode: RESTORE_DEFAULT_ON
+    # restore_mode: RESTORE_DEFAULT_ON
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_main" }
     on_state:
       then:
@@ -501,11 +533,49 @@ light:
                 - light.is_on: word_clock
                 - lambda: "return id(word_clock).get_effect_name() == \"None\";"
             then:
-              - delay: 10ms
+              - delay: 30ms
               # Enforce the light effect to be at "WordClock"
               - light.control:
                   id: word_clock
                   effect: WordClock
+        - if:
+            condition:
+              and:
+                - light.is_on: word_clock
+                - lambda: "return id(word_clock).remote_values.get_red() != id(word_clock_color_red);"
+            then:
+              - globals.set:
+                  id: word_clock_color_red
+                  value: !lambda "return id(word_clock).remote_values.get_red();"
+        - if:
+            condition:
+              and:
+                - light.is_on: word_clock
+                - lambda: "return id(word_clock).remote_values.get_green() != id(word_clock_color_green);"
+            then:
+              - globals.set:
+                  id: word_clock_color_green
+                  value: !lambda "return id(word_clock).remote_values.get_green();"
+        - if:
+            condition:
+              and:
+                - light.is_on: word_clock
+                - lambda: "return id(word_clock).remote_values.get_blue() != id(word_clock_color_blue);"
+            then:
+              - globals.set:
+                  id: word_clock_color_blue
+                  value: !lambda "return id(word_clock).remote_values.get_blue();"
+        - if: 
+            condition:
+              and: 
+                - light.is_on: word_clock
+                - switch.is_off: automatic_brightness
+                - lambda: "return id(word_clock).remote_values.get_brightness() != id(word_clock_brightness);"
+            then:
+              - globals.set:
+                  id: word_clock_brightness
+                  value: !lambda "return id(word_clock).remote_values.get_brightness();"
+  
     effects:
       - addressable_lambda:
           name: "WordClockOld"
