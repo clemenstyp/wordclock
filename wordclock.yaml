@@ -10,9 +10,9 @@ esphome:
       # read the RTC time once when the system boots
         - ds1307.read_time:
            id: ds1307_time
-    - priority: 780
+    - priority: 400
       then:
-        - light.turn_on:
+        - light.control:
             id: word_clock
             effect: WordClock
             state: on
@@ -20,7 +20,16 @@ esphome:
             red: !lambda "return id(word_clock_color_red)/255;"
             green: !lambda "return id(word_clock_color_green)/255;"
             blue: !lambda "return id(word_clock_color_blue)/255;"
-
+    - priority: -100
+      then:
+        - light.control:
+            id: word_clock
+            effect: WordClock
+            state: on
+            brightness: !lambda "return id(word_clock_brightness)/255;"
+            red: !lambda "return id(word_clock_color_red)/255;"
+            green: !lambda "return id(word_clock_color_green)/255;"
+            blue: !lambda "return id(word_clock_color_blue)/255;"
 # example boot priority:
 # 800.0: This is where all hardware initialization of vital components is executed. For example setting switches to their initial state.
 # 600.0: This is where most sensors are set up.
@@ -525,7 +534,13 @@ light:
     num_leds: 126 
     default_transition_length: 1s
     icon: "mdi:file-word-box-outline"
-    #restore_mode: ALWAYS_ON
+    # initial_state:
+    #   effect: WordClock
+    #   brightness: !lambda "return id(word_clock_brightness)/255;"
+    #   red: !lambda "return id(word_clock_color_red)/255;"
+    #   green: !lambda "return id(word_clock_color_green)/255;"
+    #   blue: !lambda "return id(word_clock_color_blue)/255;"
+    restore_mode: ALWAYS_ON
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_main" }
     on_state:
       then:
