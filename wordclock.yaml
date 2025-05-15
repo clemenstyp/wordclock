@@ -17,10 +17,10 @@ esphome:
         - light.control:
             id: word_clock
             effect: WordClock
-            brightness: !lambda "return id(word_clock_brightness);"
-            red: !lambda "return id(word_clock_color_red);"
-            green: !lambda "return id(word_clock_color_green);"
-            blue: !lambda "return id(word_clock_color_blue);"
+            brightness: !lambda "return id(word_clock_brightness)/255;"
+            red: !lambda "return id(word_clock_color_red)/255;"
+            green: !lambda "return id(word_clock_color_green)/255;"
+            blue: !lambda "return id(word_clock_color_blue)/255;"
 
 # example boot priority:
 # 800.0: This is where all hardware initialization of vital components is executed. For example setting switches to their initial state.
@@ -546,7 +546,7 @@ light:
             then:
               - globals.set:
                   id: word_clock_color_red
-                  value: !lambda "return id(word_clock).remote_values.get_red();"
+                  value: !lambda "return id(word_clock).remote_values.get_red()*255;"
         - if:
             condition:
               and:
@@ -555,7 +555,7 @@ light:
             then:
               - globals.set:
                   id: word_clock_color_green
-                  value: !lambda "return id(word_clock).remote_values.get_green();"
+                  value: !lambda "return id(word_clock).remote_values.get_green()*255;"
         - if:
             condition:
               and:
@@ -564,7 +564,7 @@ light:
             then:
               - globals.set:
                   id: word_clock_color_blue
-                  value: !lambda "return id(word_clock).remote_values.get_blue();"
+                  value: !lambda "return id(word_clock).remote_values.get_blue()*255;"
         - if: 
             condition:
               and: 
@@ -574,7 +574,7 @@ light:
             then:
               - globals.set:
                   id: word_clock_brightness
-                  value: !lambda "return id(word_clock).remote_values.get_brightness();"
+                  value: !lambda "return id(word_clock).remote_values.get_brightness()*255;"
   
     effects:
       - addressable_lambda:
