@@ -144,9 +144,9 @@ switch:
     icon: "mdi:brightness-auto"
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_dnd_settings" }
     on_turn_off:
-      - globals.set:
-          id: word_clock_brightness
-          value: !lambda "return id(word_clock).remote_values.get_brightness();"
+      - light.control:
+          id: word_clock
+          brightness: !lambda "return id(word_clock_brightness);"
     on_turn_on:
       - script.execute: 
           id: set_auto_brightness
