@@ -16,20 +16,20 @@ esphome:
             id: word_clock
             effect: WordClock
             state: on
-            brightness: !lambda "return id(word_clock_brightness)/255;"
-            red: !lambda "return id(word_clock_color_red)/255;"
-            green: !lambda "return id(word_clock_color_green)/255;"
-            blue: !lambda "return id(word_clock_color_blue)/255;"
+            brightness: !lambda "return id(word_clock_brightness);"
+            red: !lambda "return id(word_clock_color_red);"
+            green: !lambda "return id(word_clock_color_green);"
+            blue: !lambda "return id(word_clock_color_blue);"
     - priority: -100
       then:
         - light.control:
             id: word_clock
             effect: WordClock
             state: on
-            brightness: !lambda "return id(word_clock_brightness)/255;"
-            red: !lambda "return id(word_clock_color_red)/255;"
-            green: !lambda "return id(word_clock_color_green)/255;"
-            blue: !lambda "return id(word_clock_color_blue)/255;"
+            brightness: !lambda "return id(word_clock_brightness);"
+            red: !lambda "return id(word_clock_color_red);"
+            green: !lambda "return id(word_clock_color_green);"
+            blue: !lambda "return id(word_clock_color_blue);"
 # example boot priority:
 # 800.0: This is where all hardware initialization of vital components is executed. For example setting switches to their initial state.
 # 600.0: This is where most sensors are set up.
@@ -112,21 +112,21 @@ globals:
     type: uint8_t[126]
     restore_value: no
   - id: word_clock_color_red
-    type: uint8_t
+    type: float
     restore_value: yes
-    initial_value: '255'
+    initial_value: '1.0'
   - id: word_clock_color_green
-    type: uint8_t
+    type: float
     restore_value: yes
-    initial_value: '255'
+    initial_value: '0.8'
   - id: word_clock_color_blue
-    type: uint8_t
+    type: float
     restore_value: yes
-    initial_value: '255'
+    initial_value: '0.8'
   - id: word_clock_brightness
-    type: uint8_t
+    type: float
     restore_value: yes
-    initial_value: '150'
+    initial_value: '0.5'
 
 switch:
   - platform: template
@@ -536,10 +536,10 @@ light:
     icon: "mdi:file-word-box-outline"
     # initial_state:
     #   effect: WordClock
-    #   brightness: !lambda "return id(word_clock_brightness)/255;"
-    #   red: !lambda "return id(word_clock_color_red)/255;"
-    #   green: !lambda "return id(word_clock_color_green)/255;"
-    #   blue: !lambda "return id(word_clock_color_blue)/255;"
+    #   brightness: !lambda "return id(word_clock_brightness);"
+    #   red: !lambda "return id(word_clock_color_red);"
+    #   green: !lambda "return id(word_clock_color_green);"
+    #   blue: !lambda "return id(word_clock_color_blue);"
     restore_mode: ALWAYS_ON
     web_server: { sorting_weight: 10, sorting_group_id: "sorting_group_main" }
     on_state:
@@ -563,7 +563,7 @@ light:
             then:
               - globals.set:
                   id: word_clock_color_red
-                  value: !lambda "return id(word_clock).remote_values.get_red()*255;"
+                  value: !lambda "return id(word_clock).remote_values.get_red();"
         - if:
             condition:
               and:
@@ -572,7 +572,7 @@ light:
             then:
               - globals.set:
                   id: word_clock_color_green
-                  value: !lambda "return id(word_clock).remote_values.get_green()*255;"
+                  value: !lambda "return id(word_clock).remote_values.get_green();"
         - if:
             condition:
               and:
@@ -581,7 +581,7 @@ light:
             then:
               - globals.set:
                   id: word_clock_color_blue
-                  value: !lambda "return id(word_clock).remote_values.get_blue()*255;"
+                  value: !lambda "return id(word_clock).remote_values.get_blue();"
         - if: 
             condition:
               and: 
@@ -591,7 +591,7 @@ light:
             then:
               - globals.set:
                   id: word_clock_brightness
-                  value: !lambda "return id(word_clock).remote_values.get_brightness()*255;"
+                  value: !lambda "return id(word_clock).remote_values.get_brightness();"
   
     effects:
       - addressable_lambda:
