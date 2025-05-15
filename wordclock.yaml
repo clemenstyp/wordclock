@@ -16,13 +16,25 @@ esphome:
             id: word_clock
             effect: WordClock
             state: on
-            brightness: !lambda "return id(word_clock_brightness);"
+            brightness: !lambda "return id(id(minimum_brightness).state);"
             red: !lambda "return id(word_clock_color_red);"
             green: !lambda "return id(word_clock_color_green);"
             blue: !lambda "return id(word_clock_color_blue);"
-        - script.execute: 
-            id: set_auto_brightness
-            transition_length: 0
+    - priority: 300
+      then:
+        - if: 
+            condition:
+              and: 
+                - switch.is_on: automatic_brightness
+            then:
+              - script.execute: 
+                  id: set_auto_brightness
+                  transition_length: 0
+            else:
+              - light.control:
+                  id: word_clock
+                  brightness: !lambda "return id(word_clock_brightness);"
+
 
 # example boot priority:
 # 800.0: This is where all hardware initialization of vital components is executed. For example setting switches to their initial state.
