@@ -20,6 +20,8 @@ time:
                     int timestamp_with_offset = id(sntp_time).now().timestamp + int(id(time_offset));
                     auto time = ESPTime::from_epoch_local(timestamp_with_offset);
                     ESP_LOGD("Time", "Testrun Time: %s", time.strftime("%Y-%m-%d %H:%M:%S").c_str());    
+                - script.execute: 
+                    id: calculate_wordclock_letter
                 - if:
                     condition:
                       switch.is_off: manual_time
