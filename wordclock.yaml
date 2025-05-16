@@ -140,6 +140,12 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     web_server: { sorting_weight: 30, sorting_group_id: "sorting_group_extra_settings" }
     icon: "mdi:clock-edit-outline"
+    on_turn_off:
+      - script.execute: 
+          id: calculate_wordclock_letter
+    on_turn_on:
+      - script.execute: 
+          id: calculate_wordclock_letter
   - platform: template
     name: "Auto Brightness"
     id: automatic_brightness
