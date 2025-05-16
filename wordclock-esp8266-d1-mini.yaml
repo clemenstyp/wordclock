@@ -36,22 +36,22 @@ ota:
 logger:
   level: INFO
 
-# update:
-#   - platform: http_request
-#     id: firmware_update
-#     name: Firmware
-#     source: http://clemenstyp.github.io/wordclock/firmware/wordclock.manifest.json
-#     update_interval: 6h
-#     icon: "mdi:cellphone-arrow-down"
-#     web_server: { sorting_weight: 30, sorting_group_id: "sorting_group_update" }
-#   - platform: http_request
-#     id: firmware_update_beta
-#     name: Firmware (Beta)
-#     source: http://clemenstyp.github.io/wordclock/beta-firmware/wordclock.manifest.json
-#     update_interval: 6h
-#     icon: "mdi:test-tube"
-#     disabled_by_default: true
-#     web_server: { sorting_weight: 32, sorting_group_id: "sorting_group_update" }
+update:
+  - platform: http_request
+    id: firmware_update
+    name: Firmware
+    source: http://clemenstyp.github.io/wordclock/firmware/wordclock.manifest.json
+    update_interval: 6h
+    icon: "mdi:cellphone-arrow-down"
+    web_server: { sorting_weight: 30, sorting_group_id: "sorting_group_update" }
+  - platform: http_request
+    id: firmware_update_beta
+    name: Firmware (Beta)
+    source: http://clemenstyp.github.io/wordclock/beta-firmware/wordclock.manifest.json
+    update_interval: 6h
+    icon: "mdi:test-tube"
+    disabled_by_default: true
+    web_server: { sorting_weight: 32, sorting_group_id: "sorting_group_update" }
 
 button:
   - platform: template
