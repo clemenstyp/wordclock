@@ -42,8 +42,6 @@ esphome:
 # 250.0: At this priority, WiFi is initialized.
 # 200.0: Network connections like MQTT/native API are set up at this priority.
 # -100.0: At this priority, pretty much everything should already be initialized.
-
-
       
 # used for ds1307 i2c
 # sda kann auch GPIO4 sein
@@ -531,13 +529,20 @@ number:
           transition_length: 50
 
 light:
-  - platform: neopixelbus
+  - platform: fastled_clockless
     name: "Word Clock"
     id: word_clock
-    type: GRB
-    variant: WS2812X
+    rgb_order: GRB
+    chipset: WS2812
     pin: $led_pin
     num_leds: 126 
+  # - platform: neopixelbus
+  #   name: "Word Clock"
+  #   id: word_clock
+  #   type: GRB
+  #   variant: WS2812X
+  #   pin: $led_pin
+  #   num_leds: 126 
     default_transition_length: 1s
     icon: "mdi:file-word-box-outline"
     # initial_state:
