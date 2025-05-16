@@ -8,7 +8,7 @@ time:
   - id: !extend ds1307_time
     on_time:
       # Every 1 second
-      - seconds: '0'
+      - seconds: '*'
         minutes: '*'
         then:
           - if:
