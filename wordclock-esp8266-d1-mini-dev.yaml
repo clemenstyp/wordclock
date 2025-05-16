@@ -8,7 +8,7 @@ time:
   - id: !extend ds1307_time
     on_time:
       # Every 1 second
-      - seconds: '0'
+      - seconds: '*'
         minutes: '*'
         then:
           - if:
@@ -20,6 +20,11 @@ time:
                     int timestamp_with_offset = id(sntp_time).now().timestamp + int(id(time_offset));
                     auto time = ESPTime::from_epoch_local(timestamp_with_offset);
                     ESP_LOGD("Time", "Testrun Time: %s", time.strftime("%Y-%m-%d %H:%M:%S").c_str());    
+                - script.execute: 
+                    id: calculate_wordclock_letter
+                - script.execute: 
+                    id: set_auto_brightness
+                    transition_length: 50
                 - if:
                     condition:
                       switch.is_off: manual_time

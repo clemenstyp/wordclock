@@ -13,13 +13,14 @@ esphome:
 
 
 wifi:
-  reboot_timeout: 0min
+  reboot_timeout: 60min
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   # passive_scan: true
+  output_power: 17.5
   ap:
     ssid: "${fallback_hotspot_ssid}"
     password: "${fallback_hotspot_password}"
-    ap_timeout: 60s
+    ap_timeout: 30s
 
 # # Enable logging
 logger:
