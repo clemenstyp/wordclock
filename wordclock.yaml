@@ -289,7 +289,7 @@ script:
                 id: word_clock
                 transition_length: !lambda return transition_length;
                 brightness: !lambda |-
-                  ESP_LOGD("AUTO BRIGHTNESS", "begin");
+                  //ESP_LOGD("AUTO BRIGHTNESS", "begin");
                   float min_brightness = id(minimum_brightness).state;
                   float max_brightness = id(maximum_brightness).state;
                   float brightness = id(maximum_brightness).state;
@@ -323,13 +323,13 @@ script:
                                         
                     brightness = min_brightness + ((max_brightness - min_brightness) * (time_passed / total_duration));  // Gradually increse brightness
                   } 
-                  ESP_LOGD("AUTO BRIGHTNESS", "end");
+                  //ESP_LOGD("AUTO BRIGHTNESS", "end");
                   return brightness;
   - id: calculate_wordclock_letter
     mode: single
     then:
       - lambda: |-
-          ESP_LOGD("CALCULATE WORDCLOCK LETTER", "begin");
+          //ESP_LOGD("CALCULATE WORDCLOCK LETTER", "begin");
           static uint8_t previousMinutes;
 
           // LED IDs            
@@ -469,7 +469,7 @@ script:
             } 
 
           }
-          ESP_LOGD("CALCULATE WORDCLOCK LETTER", "end");
+          //ESP_LOGD("CALCULATE WORDCLOCK LETTER", "end");
 
 
 
@@ -812,10 +812,10 @@ light:
 
       - addressable_lambda:
           name: "WordClock"
-          update_interval: 500ms
+          update_interval: 20ms
           lambda: |-
-            ESP_LOGD("EFFECT", "begin");
-            const int update_interval_ms = 500;
+            //ESP_LOGD("EFFECT", "begin");
+            const int update_interval_ms = 20;
 
             /*
              * Below is the transition control of the clock to change to the next time (next 5 minute section).
@@ -874,7 +874,7 @@ light:
               }
             }
             id(currentFade)--;
-            ESP_LOGD("EFFECT", "end");
+            //ESP_LOGD("EFFECT", "end");
 
      
      

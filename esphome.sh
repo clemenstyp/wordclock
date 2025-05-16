@@ -107,11 +107,11 @@ if [[ -n $LOGFILE ]]; then
     -v "${PWD}":/config \
     -v /etc/timezone:/etc/timezone:ro \
     -it ghcr.io/esphome/esphome \
-    $COMMAND $DEVICE_OPTION $FILENAME ${EXTRA_ARGS[@]} | tee -a $LOGFILE
+    $COMMAND $DEVICE_OPTION ${EXTRA_ARGS[@]} $FILENAME | tee -a $LOGFILE
 else
   docker run --rm --privileged \
     -v "${PWD}":/config \
     -v /etc/timezone:/etc/timezone:ro \
     -it ghcr.io/esphome/esphome \
-    $COMMAND $DEVICE_OPTION $FILENAME ${EXTRA_ARGS[@]}
+    $COMMAND $DEVICE_OPTION ${EXTRA_ARGS[@]} $FILENAME
 fi
