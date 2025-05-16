@@ -143,9 +143,15 @@ switch:
     on_turn_off:
       - script.execute: 
           id: calculate_wordclock_letter
+      - script.execute: 
+          id: set_auto_brightness
+          transition_length: 1000
     on_turn_on:
       - script.execute: 
           id: calculate_wordclock_letter
+      - script.execute: 
+          id: set_auto_brightness
+          transition_length: 1000
   - platform: template
     name: "Auto Brightness"
     id: automatic_brightness
