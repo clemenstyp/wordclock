@@ -17,6 +17,11 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   # passive_scan: true
   output_power: 17.5
+  # power save mode:
+  # NONE (least power saving, Default for ESP8266)
+  # LIGHT (Default for ESP32)
+  # HIGH (most power saving)
+  power_save_mode: HIGH
   ap:
     ssid: "${fallback_hotspot_ssid}"
     password: "${fallback_hotspot_password}"
