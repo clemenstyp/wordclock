@@ -31,7 +31,7 @@ ota:
 
 # Enable logging
 logger:
-  level: INFO
+  level: error
 
 update:
   - platform: http_request

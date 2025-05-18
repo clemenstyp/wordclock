@@ -41,6 +41,6 @@ sensor:
 # # Logger must be at least debug (default)
 logger:
   # level: verbose
-  initial_level: debug
+  level: debug
 
 

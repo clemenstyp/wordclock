@@ -30,6 +30,7 @@ wifi:
 # # Enable logging
 logger:
 
+
 # Enable Home Assistant API
 api:
   reboot_timeout: 0s
