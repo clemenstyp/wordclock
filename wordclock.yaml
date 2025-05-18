@@ -469,8 +469,10 @@ script:
               add_word(4);
             }
 
-
-            if ( ( time.minute <= 2 || time.minute >= 58 ) && ((time.hour % 12) == 1) ) {
+            // show "ein uhr" instead of "eins uhr"
+            if ( time.minute <= 2 && ((time.hour % 12) == 1) ) {
+              add_word(22);
+            }else if ( time.minute >= 58 && ((time.hour % 12) == 0) ) {
               add_word(22);
             }else if (time.minute >= 23){ // für fünf vor halb...
               add_word(((time.hour +1 ) % 12) + 10);
