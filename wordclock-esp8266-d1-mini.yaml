@@ -16,12 +16,9 @@ packages:
       i2c_sda_pin: D2
 
 
-
 esp8266:
   board: d1_mini
   restore_from_flash: true
-  #framework:
-  #  version: 3.0.2
 
 http_request:
   useragent: esphome/device
@@ -34,7 +31,7 @@ ota:
 
 # Enable logging
 logger:
-  level: INFO
+  level: error
 
 update:
   - platform: http_request

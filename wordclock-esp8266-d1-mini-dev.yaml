@@ -32,7 +32,7 @@ time:
                       - switch.turn_on: manual_time       
 
 logger:
-  level: debug
+  level: info
 
 select:
   - platform: logger
