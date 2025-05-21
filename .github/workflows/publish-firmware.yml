@@ -1,8 +1,16 @@
 name: Publish Firmware
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - 'static/**'
+      - '.github/workflows/publish-pages.yml'    
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -12,20 +20,66 @@ jobs:
     name: Prepare
     runs-on: ubuntu-latest
     outputs:
-      changelog: ${{ steps.changelog.outputs.changelog }}
+      last_version: ${{ steps.generate_variables.outputs.last_version }}
+      version: ${{ steps.generate_variables.outputs.version }}
+      changelog: ${{ steps.generate_variables.outputs.changelog }}
+      file: ${{ steps.generate_variables.outputs.file }}
     steps:
-      - name: Generate Changelog
-        id: changelog
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Generate Variables
+        id: generate_variables
         run: |
-          release_body=${{ github.event.release.body }}
+          if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
+            # Führe Aktionen für den main-Branch aus
+            last_version=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep -E '^[0-9]'  | head -n 1)
+
+            echo last_version=$last_version >> $GITHUB_OUTPUT
+
+            # Split the version into an array
+            IFS='.' read -r -a version_parts <<< "$last_version"
+
+            # Increment the patch version (the last part)
+            patch=${version_parts[2]}
+            patch=$((patch + 1))
+
+            # Construct the new version
+            new_version="${version_parts[0]}.${version_parts[1]}.$patch"
+
+            echo version=$new_version >> $GITHUB_OUTPUT
+
+            echo file="wordclock-esp8266-d1-mini.factory.yaml" >> $GITHUB_OUTPUT
+
+          elif [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
+            # Führe Aktionen für den develop-Branch aus
+            last_version=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep  '^dev-'  | head -n 1)
+            
+            echo last_version=$last_version >> $GITHUB_OUTPUT
+
+            new_version=dev-$(TZ='Europe/Berlin' date +'%Y%m%d-%H%M')
+
+            echo version=$new_version >> $GITHUB_OUTPUT
+
+            echo file="wordclock-esp8266-d1-mini-dev.factory.yaml" >> $GITHUB_OUTPUT
+          else
+            # Führe Aktionen für andere Branches aus
+            last_version='unknown'
+          fi 
           {
             echo 'changelog<<EOF'
-            release_body=$(echo "$release_body" | awk '{if ($0 !~ /^ *$/ && $0 !~ /^[- ]/) print "- " $0; else if ($0 !~ /^ *$/) print $0}')
-            if [ ${#release_body} -gt 100 ]; then
-              echo "${release_body:0:100}[...]"
+            echo "## Changes since version ${last_version}"
+            echo "" 
+            commit_messages=$(git log ${last_version}..HEAD --pretty=format:"%B")
+            # Process each line to add '-' if the line is not empty and doesn't start with a space or a '-', and remove empty lines
+            commit_messages=$(echo "$commit_messages" | awk '{if ($0 !~ /^ *$/ && $0 !~ /^[- ]/) print "- " $0; else if ($0 !~ /^ *$/) print $0}')
+            if [ ${#commit_messages} -gt 100 ]; then
+              echo "${commit_messages:0:100}[...]"
             else
-              echo "$release_body"
+              echo "$commit_messages"
             fi
+            echo ""
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
@@ -36,19 +90,133 @@ jobs:
     with:
       #### Modify below here to match your project ####
       files: |
-        wordclock-esp8266-d1-mini.factory.yaml
+        ${{ needs.prepare.outputs.file }}
       esphome-version: stable #2025.4.0
       combined-name: wordclock
       #### Modify above here to match your project ####
       release-summary: '${{ needs.prepare.outputs.changelog }}'
-      #release-summary: ${{ github.event.release.body }}
-      release-url: ${{ github.event.release.html_url }}
-      release-version: ${{ github.event.release.tag_name }}
+      release-url: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${{ needs.prepare.outputs.version }}
+      release-version:  ${{ needs.prepare.outputs.version }}
 
   upload-to-release:
     name: Upload to Release
-    uses: esphome/workflows/.github/workflows/upload-to-gh-release.yml@2025.4.0
     needs:
       - build-firmware
-    with:
-      version: ${{ github.event.release.tag_name }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Delete old Dev-Releases
+        if: ${{ github.ref == 'refs/heads/maidevelopn' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            // Wrap the logic in an async function
+            async function deleteOldDevReleases() {
+              try {
+                const repositoryTags = await github.rest.repos.listTags({
+                  owner,
+                  repo,
+                });
+
+                if (repositoryTags && repositoryTags.data) {
+                  for (const tag of repositoryTags.data) {
+                   
+                    if (tag.name.startsWith('dev-')) {
+                      try {
+                        console.log(`Try to remove Tag with name: ${tag.name}.`);
+                        // Fetch the latest release information
+                        const taggedRelease = await github.rest.repos.getReleaseByTag({
+                          owner,
+                          repo,
+                          tag: tag.name,
+                        });
+
+                        // Check if the latest release information was successfully retrieved
+                        if (taggedRelease && taggedRelease.data && taggedRelease.data.id) {
+                          // If there is a latest release, then delete it
+                          await github.rest.repos.deleteRelease({
+                            owner,
+                            repo,
+                            release_id: taggedRelease.data.id,
+                          });
+                          console.log(`Release id ${taggedRelease.data.id} has been deleted.`);
+                        } else {
+                          // If no latest release was found or retrieval failed, output a message
+                          console.log("No latest release found or failed to retrieve it.");
+                        }
+                      } catch (error) {
+                        console.error(`Failed to retrieve or delete tag: ${tag.name} - error: ${error}`);
+                      }
+                    }
+                  }
+                }
+              } catch (error) {
+                console.error(`Failed to list tags - error: ${error}`);
+              }
+            }
+
+            // Call the async function
+            deleteOldDevReleases();
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Download Artifact
+        uses: actions/download-artifact@v4.3.0
+        with:
+          path: files
+      - name: Copy files to output
+        run: |-
+          shopt -s nullglob
+          mkdir output
+          version="${{ needs.build-firmware.outputs.version }}"
+          pushd files
+          for device in *; do
+            pushd $device
+            pushd $version
+            cp manifest.json ../../../output/$device.manifest.json
+            for bin in *.{bin,elf}; do
+              md5sum $bin | head -c 32 > ../../../output/$bin.md5
+              cp $bin ../../../output/
+            done
+            popd
+            popd
+          done
+          popd
+      - name: Generate Changelog
+        run: |
+          last_version=${{ needs.prepare.outputs.last_version }}
+          if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
+            echo "## Installation" > ${{ github.workspace }}-CHANGELOG.txt
+            echo "[Install Page](https://clemenstyp.github.io/wordclock/index.html)" >> ${{ github.workspace }}-CHANGELOG.txt
+          elif [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
+            echo "## Beta Installation" > ${{ github.workspace }}-CHANGELOG.txt
+            echo "[Beta Install Page](https://clemenstyp.github.io/wordclock/beta.html)" >> ${{ github.workspace }}-CHANGELOG.txt
+          else
+            # Führe Aktionen für andere Branches aus
+          fi 
+          
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "## Changelog" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "<details><summary>Changes since version ${last_version}</summary><p>" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
+          do
+              commit_message=$(git log -1 --pretty=format:"%B" $hash)
+              echo "[$hash]: $commit_message" | sed 's/^/- /' >> ${{ github.workspace }}-CHANGELOG.txt
+          done
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "</p></details><summary></summary>" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+      - name: Upload files to release
+        uses: softprops/action-gh-release@v2.2.2
+        with:
+          files: output/*
+          tag_name: ${{ needs.build-firmware.outputs.version }}
+          prerelease: true
+          name: "Dev-Version: ${{ needs.build-firmware.outputs.version }}"
+          body_path: ${{ github.workspace }}-CHANGELOG.txt
