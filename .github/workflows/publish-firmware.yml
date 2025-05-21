@@ -57,7 +57,7 @@ jobs:
 
             echo file="wordclock-esp8266-d1-mini.factory.yaml" >> $GITHUB_OUTPUT
 
-            echo release_name="$new_version" >> $GITHUB_OUTPUT
+            echo release_name="WordClock Version $new_version" >> $GITHUB_OUTPUT
             echo prerelease=false >> $GITHUB_OUTPUT
 
           elif [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
@@ -124,8 +124,8 @@ jobs:
             {
               echo 'full_changelog<<EOF'
               if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
-                echo "## Installation"
-                echo "[Install Page](https://clemenstyp.github.io/wordclock/index.html)"
+                echo "## 🕒 WordClock Version $new_version Release Notes"
+                echo "To install the current version with ESP-Web visit the [Install Page](https://clemenstyp.github.io/wordclock/index.html)."
               elif [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
                 echo "## Beta Installation"
                 echo "[Beta Install Page](https://clemenstyp.github.io/wordclock/beta.html)"
