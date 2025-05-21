@@ -73,8 +73,9 @@ time:
           - script.execute: 
               id: set_auto_brightness
               transition_length: 1000
-      - seconds: 0
-        minutes: /1
+      # Every 1 second
+      - seconds: '*'
+        minutes: '*'
         then:
           - script.execute: 
               id: calculate_wordclock_letter
