@@ -58,3 +58,12 @@ update:
   - id: !extend firmware_update_beta
     update_interval: 1h
     disabled_by_default: false
+
+debug:
+  update_interval: 30s
+
+text_sensor:
+  - platform: debug
+    reset_reason:
+      name: "Reset Reason"
+      web_server: { sorting_weight: 23, sorting_group_id: "sorting_group_diagnostic" }   
