@@ -3,7 +3,6 @@ name: Publish Firmware
 on:
   push:
     branches:
-      - main
       - develop
     paths-ignore:
       - 'static/**'
@@ -37,7 +36,11 @@ jobs:
       - name: Generate Variables
         id: generate_variables
         run: |
-          if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
+          BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}")
+          if [ "${GITHUB_EVENT_NAME}" == "pull_request" ] || [ "${GITHUB_EVENT_NAME}" == "pull_request_target" ]; then
+            BRANCH_NAME=${{github.base_ref}}
+          fi
+          if [ "${BRANCH_NAME}" == "main" ]; then
             # Führe Aktionen für den main-Branch aus
             last_version=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep -E '^[0-9]'  | head -n 1)
 
@@ -60,7 +63,7 @@ jobs:
             echo release_name="WordClock Version $new_version" >> $GITHUB_OUTPUT
             echo prerelease=false >> $GITHUB_OUTPUT
 
-          elif [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
+          elif [ "${BRANCH_NAME}" == "develop" ]; then
             # Führe Aktionen für den develop-Branch aus
             last_version=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep  '^dev-'  | head -n 1)
             
@@ -75,7 +78,6 @@ jobs:
             echo prerelease=true >> $GITHUB_OUTPUT
           else
             # Führe Aktionen für andere Branches aus
-            BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}")
             last_version=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep  "^$BRANCH_NAME-"  | head -n 1)
             
             new_version=$BRANCH_NAME-$(TZ='Europe/Berlin' date +'%Y%m%d-%H%M')
