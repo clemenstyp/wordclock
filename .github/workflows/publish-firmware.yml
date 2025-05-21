@@ -23,9 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       last_version: ${{ steps.generate_variables.outputs.last_version }}
-      version: ${{ steps.generate_variables.outputs.version }}
-      changelog: ${{ steps.generate_variables.outputs.changelog }}
+      new_version: ${{ steps.generate_variables.outputs.new_version }}
+      short_changelog: ${{ steps.generate_variables.outputs.short_changelog }}
+      full_changelog: ${{ steps.generate_variables.outputs.full_changelog }}
       file: ${{ steps.generate_variables.outputs.file }}
+      release_name: ${{ steps.generate_variables.outputs.release_name }}
+      prerelease: ${{ steps.generate_variables.outputs.prerelease }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -50,9 +53,12 @@ jobs:
             # Construct the new version
             new_version="${version_parts[0]}.${version_parts[1]}.$patch"
 
-            echo version=$new_version >> $GITHUB_OUTPUT
+            echo new_version=$new_version >> $GITHUB_OUTPUT
 
             echo file="wordclock-esp8266-d1-mini.factory.yaml" >> $GITHUB_OUTPUT
+
+            echo release_name="$new_version" >> $GITHUB_OUTPUT
+            echo prerelease=false >> $GITHUB_OUTPUT
 
           elif [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
             # Führe Aktionen für den develop-Branch aus
@@ -62,28 +68,91 @@ jobs:
 
             new_version=dev-$(TZ='Europe/Berlin' date +'%Y%m%d-%H%M')
 
-            echo version=$new_version >> $GITHUB_OUTPUT
+            echo new_version=$new_version >> $GITHUB_OUTPUT
 
             echo file="wordclock-esp8266-d1-mini-dev.factory.yaml" >> $GITHUB_OUTPUT
+            echo release_name="Dev-Version: $new_version" >> $GITHUB_OUTPUT
+            echo prerelease=true >> $GITHUB_OUTPUT
           else
             # Führe Aktionen für andere Branches aus
-            last_version='unknown'
+            BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}")
+            last_version=$(git rev-list --tags --no-walk | xargs -I {} sh -c 'git tag --contains {} '| grep  "^$BRANCH_NAME-"  | head -n 1)
+            
+            new_version=$BRANCH_NAME-$(TZ='Europe/Berlin' date +'%Y%m%d-%H%M')
+            echo new_version=$new_version >> $GITHUB_OUTPUT
+            echo file="wordclock-esp8266-d1-mini.factory.yaml" >> $GITHUB_OUTPUT
+            echo release_name="$BRANCH_NAME-Version: $new_version" >> $GITHUB_OUTPUT
+            echo prerelease=true >> $GITHUB_OUTPUT
           fi 
-          {
-            echo 'changelog<<EOF'
-            echo "## Changes since version ${last_version}"
-            echo "" 
-            commit_messages=$(git log ${last_version}..HEAD --pretty=format:"%B")
-            # Process each line to add '-' if the line is not empty and doesn't start with a space or a '-', and remove empty lines
-            commit_messages=$(echo "$commit_messages" | awk '{if ($0 !~ /^ *$/ && $0 !~ /^[- ]/) print "- " $0; else if ($0 !~ /^ *$/) print $0}')
-            if [ ${#commit_messages} -gt 100 ]; then
-              echo "${commit_messages:0:100}[...]"
-            else
-              echo "$commit_messages"
-            fi
-            echo ""
-            echo 'EOF'
-          } >> "$GITHUB_OUTPUT"
+
+          if [ "${GITHUB_EVENT_NAME}" == "release" ] && [ "${GITHUB_EVENT_ACTION}" == "published" ]; then
+            #  "This is a release event!"
+            # Führe Aktionen für ein Release aus, z.B. Deployment oder Benachrichtigung
+            full_changelog=${{ github.event.release.body }}
+            {
+              echo 'short_changelog<<EOF'
+              changelog=$(echo "$full_changelog" | awk '{if ($0 !~ /^ *$/ && $0 !~ /^[- ]/) print "- " $0; else if ($0 !~ /^ *$/) print $0}')
+              if [ ${#changelog} -gt 100 ]; then
+                echo "${changelog:0:100}[...]"
+              else
+                echo "$changelog"
+              fi
+              echo 'EOF'
+            } >> "$GITHUB_OUTPUT"
+            {
+              echo 'full_changelog<<EOF'
+              echo "$full_changelog"
+              echo 'EOF'
+            } >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo 'short_changelog<<EOF'
+              echo "## Changes since version ${last_version}"
+              echo "" 
+              commit_messages=$(git log ${last_version}..HEAD --pretty=format:"%B")
+              # Process each line to add '-' if the line is not empty and doesn't start with a space or a '-', and remove empty lines
+              commit_messages=$(echo "$commit_messages" | awk '{if ($0 !~ /^ *$/ && $0 !~ /^[- ]/) print "- " $0; else if ($0 !~ /^ *$/) print $0}')
+              if [ ${#commit_messages} -gt 100 ]; then
+                echo "${commit_messages:0:100}[...]"
+              else
+                echo "$commit_messages"
+              fi
+              echo ""
+              echo 'EOF'
+            } >> "$GITHUB_OUTPUT"
+
+            {
+              echo 'full_changelog<<EOF'
+              if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
+                echo "## Installation"
+                echo "[Install Page](https://clemenstyp.github.io/wordclock/index.html)"
+              elif [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
+                echo "## Beta Installation"
+                echo "[Beta Install Page](https://clemenstyp.github.io/wordclock/beta.html)"
+              else
+                # Führe Aktionen für andere Branches aus
+                echo "## Installation"
+              fi 
+              echo ""
+              echo "## Changelog"
+              echo ""
+              echo "<details><summary>Changes since version ${last_version}</summary><p>"
+              echo ""
+              git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
+              do
+                  commit_message=$(git log -1 --pretty=format:"%B" $hash)
+                  echo "[$hash]: $commit_message" | sed 's/^/- /'
+              done
+              echo ""
+              echo "</p></details><summary></summary>"
+              echo ""
+
+              echo 'EOF'
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+          
+
 
   build-firmware:
     name: Build Firmware
@@ -96,9 +165,9 @@ jobs:
       esphome-version: stable #2025.4.0
       combined-name: wordclock
       #### Modify above here to match your project ####
-      release-summary: '${{ needs.prepare.outputs.changelog }}'
-      release-url: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${{ needs.prepare.outputs.version }}
-      release-version:  ${{ needs.prepare.outputs.version }}
+      release-summary: '${{ needs.prepare.outputs.short_changelog }}'
+      release-url: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${{ needs.prepare.outputs.new_version }}
+      release-version:  ${{ needs.prepare.outputs.new_version }}
 
   upload-to-release:
     name: Upload to Release
@@ -110,7 +179,7 @@ jobs:
       contents: write
     steps:
       - name: Delete old Dev-Releases
-        if: ${{ github.ref == 'refs/heads/maidevelopn' }}
+        if: ${{ github.ref == 'refs/heads/develop' }}
         uses: actions/github-script@v7
         with:
           script: |
@@ -175,7 +244,7 @@ jobs:
         run: |-
           shopt -s nullglob
           mkdir output
-          version="${{ needs.build-firmware.outputs.version }}"
+          version="${{ needs.prepare.outputs.new_version }}"
           pushd files
           for device in *; do
             pushd $device
@@ -191,36 +260,13 @@ jobs:
           popd
       - name: Generate Changelog
         run: |
-          last_version=${{ needs.prepare.outputs.last_version }}
-          if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
-            echo "## Installation" > ${{ github.workspace }}-CHANGELOG.txt
-            echo "[Install Page](https://clemenstyp.github.io/wordclock/index.html)" >> ${{ github.workspace }}-CHANGELOG.txt
-          elif [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
-            echo "## Beta Installation" > ${{ github.workspace }}-CHANGELOG.txt
-            echo "[Beta Install Page](https://clemenstyp.github.io/wordclock/beta.html)" >> ${{ github.workspace }}-CHANGELOG.txt
-          else
-            # Führe Aktionen für andere Branches aus
-            echo "## Installation" > ${{ github.workspace }}-CHANGELOG.txt
-          fi 
-          
-          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
-          echo "## Changelog" >> ${{ github.workspace }}-CHANGELOG.txt
-          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
-          echo "<details><summary>Changes since version ${last_version}</summary><p>" >> ${{ github.workspace }}-CHANGELOG.txt
-          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
-          git log ${last_version}..HEAD --pretty=format:"%h" | while IFS= read -r hash
-          do
-              commit_message=$(git log -1 --pretty=format:"%B" $hash)
-              echo "[$hash]: $commit_message" | sed 's/^/- /' >> ${{ github.workspace }}-CHANGELOG.txt
-          done
-          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
-          echo "</p></details><summary></summary>" >> ${{ github.workspace }}-CHANGELOG.txt
-          echo "" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "${{ needs.prepare.outputs.full_changelog }}" >> ${{ github.workspace }}-CHANGELOG.txt
       - name: Upload files to release
         uses: softprops/action-gh-release@v2.2.2
         with:
           files: output/*
-          tag_name: ${{ needs.build-firmware.outputs.version }}
-          prerelease: true
-          name: "Dev-Version: ${{ needs.build-firmware.outputs.version }}"
+          tag_name: ${{ needs.prepare.outputs.new_version }}
+          prerelease: ${{ needs.prepare.outputs.prerelease }}
+          name: ${{ needs.prepare.outputs.release_name }}
           body_path: ${{ github.workspace }}-CHANGELOG.txt
+          target_commitish: ${{github.sha}}
