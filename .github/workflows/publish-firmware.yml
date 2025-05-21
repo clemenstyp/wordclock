@@ -4,12 +4,10 @@ on:
   push:
     branches:
       - develop
+      - main
     paths-ignore:
       - 'static/**'
       - '.github/workflows/publish-pages.yml'    
-  pull_request:
-    branches:
-      - main
   release:
     types: [published]
 

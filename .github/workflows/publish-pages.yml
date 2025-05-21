@@ -10,7 +10,6 @@ on:
   workflow_run:
     workflows:
       - Publish Firmware
-      - Publish Dev Firmware
     types:
       - completed
   pull_request:
