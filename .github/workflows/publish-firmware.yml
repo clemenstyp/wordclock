@@ -11,6 +11,8 @@ on:
   pull_request:
     branches:
       - main
+  release:
+    types: [published]
 
 permissions:
   contents: write
@@ -102,6 +104,7 @@ jobs:
     name: Upload to Release
     needs:
       - build-firmware
+      - prepare
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -197,6 +200,7 @@ jobs:
             echo "[Beta Install Page](https://clemenstyp.github.io/wordclock/beta.html)" >> ${{ github.workspace }}-CHANGELOG.txt
           else
             # Führe Aktionen für andere Branches aus
+            echo "## Installation" > ${{ github.workspace }}-CHANGELOG.txt
           fi 
           
           echo "" >> ${{ github.workspace }}-CHANGELOG.txt
