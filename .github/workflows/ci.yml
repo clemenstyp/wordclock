@@ -14,7 +14,8 @@ concurrency:
 
 jobs:
   ci:
-    name: Building ${{ matrix.file }} / ${{ matrix.esphome-version }}
+    name: Running CI Job
+    # name: Building ${{ matrix.file }} / ${{ matrix.esphome-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
