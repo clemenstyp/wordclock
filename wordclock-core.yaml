@@ -37,6 +37,7 @@ api:
 
 ota:
   - platform: esphome
+  - platform: web_server
 
 captive_portal:
 
@@ -46,7 +47,6 @@ web_server:
   # local: false
   version: 3
   log: false
-  ota: true
   sorting_groups:
     - id: sorting_group_main    
       name: "General Settings"
