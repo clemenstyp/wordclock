@@ -49,7 +49,7 @@ You can set a time span in which the clock should be switched off.
 ## Build localy:
 `docker run --rm --privileged -v "${PWD}":/config -it ghcr.io/esphome/esphome compile wordclock-esp8266-d1-mini-dev.debug.yaml`
 
-or install it with homebrew
+or install it with brew
 `brew install esphome`
 
 and run:
